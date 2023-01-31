@@ -11,7 +11,7 @@ class Parser {
     public const PATTERN_MONOLOG2 = 
         "/^". // start with newline
         "\[(?<datetime>.*)\] ". // find the date that is between two brackets []
-        "(?<logger>[\w-]+).(?<level>\w+): ". // get the logger and log level, they look lilke this: channel.ERROR, follow by colon and space
+        "(?<channel>[\w-]+).(?<level>\w+): ". // get the channel and log level, they look lilke this: channel.ERROR, follow by colon and space
         "(?<message>[^\[\{]+) ". // next up is the message, tailed by a space character
         "(?<context>[\[\{].*[\]\}]) ". // followed by context within either square [] or curly {} brackets, tailed by a space
         "(?<extra>[\[\{].*[\]\}])". // followed by extra within either square [] or curly {} brackets
@@ -20,7 +20,7 @@ class Parser {
     public const PATTERN_LARAVEL = 
         "/^". // start with newline
         "\[(?<datetime>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] ". // find the datetime with a specific Y-m-d H:i:s format between square brackets [] and a tailing space
-        "(?<logger>\w+)\.(?<level>\w+): ". // get the logger and log level, they look lilke this: channel.ERROR, follow by colon and space
+        "(?<channel>\w+)\.(?<level>\w+): ". // get the channel and log level, they look lilke this: channel.ERROR, follow by colon and space
         "(?<message>.*?)". // get the message, but with the non-greedy selector *? instead of the gready * for any . character (this will catch as few characters as possible until it finds the next part of the pattern)
         "(?: (?<context>\{.*?\})\s+$|$)". // get the context. the context is optional, which is why the outer group () starts with the non-capture flag ?: (it will not show in matches). it will either (a) capture a space followed by the context (non-greedy) in curly brackets, an optional space character and end of line, or (b) just the end of line
         "/ms"; // flags: m = multiline, s = . includes newline character
@@ -81,7 +81,7 @@ class Parser {
         foreach($matches as $match) {
             $entry = new LogRecord(
                 new \DateTimeImmutable($match['datetime']),
-                $match['logger'] ?? '',
+                $match['channel'] ?? '',
                 $match['level'] ?? '',
                 trim($match['message'] ?? ''),
                 json_decode(str_replace(["\r", "\n"], ['', '\n'], $match['context']) ?? '[]'),
