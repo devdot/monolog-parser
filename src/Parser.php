@@ -84,7 +84,7 @@ class Parser {
                 $match['channel'] ?? '',
                 $match['level'] ?? '',
                 trim($match['message'] ?? ''),
-                json_decode(str_replace(["\r", "\n"], ['', '\n'], $match['context']) ?? '[]'),
+                json_decode(str_replace(["\r", "\n"], ['', '\n'], $match['context'] ?? '[]')),
                 json_decode($match['extra'] ?? '[]'),
             );
             $this->records[] = $entry;
