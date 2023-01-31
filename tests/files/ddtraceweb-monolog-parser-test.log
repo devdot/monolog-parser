@@ -5,3 +5,4 @@
 [2013-08-15 14:19:51] context.INFO: multicontext with empty [{"foo":"bar","stuff":"and things"},[]] []
 [2013-08-15 14:19:51] context.INFO: multicontext with spaces [{"foo":"bar","stuff":"and things"},{"bat":"baz"}] []
 [2013-08-15 14:19:51] extra.INFO: context and extra [{"foo":"bar","stuff":"and things"},{"bat":"baz"}] [{"weebl":"bob"},{"lobob":"lo"}]
+[2023-01-31 12:00:00] test.INFO: extra as object [] {"test":true}

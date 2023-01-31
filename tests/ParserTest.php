@@ -199,7 +199,7 @@ final class ParserTest extends TestCase {
         // load the file and parse it
         $records = (new Parser($this->files[2]))->get();
 
-        $this->assertCount(7, $records);
+        $this->assertCount(8, $records);
 
         // manually check every detail of the log
         // LOG #0
@@ -330,5 +330,18 @@ final class ParserTest extends TestCase {
         $this->assertObjectHasAttribute('lobob', $record['extra'][1]);
         $this->assertEquals('lo', $record['extra'][1]->lobob);
 
+        // LOG #7
+        $record = $records[7];
+        $this->assertInstanceOf(\DateTimeImmutable::class, $record['datetime']);
+        $this->assertEquals('2023-01-31 12:00:00', $record['datetime']->format('Y-m-d H:i:s'));
+        $this->assertEquals('test', $record['channel']);
+        $this->assertEquals('INFO', $record['level']);
+        $this->assertEquals('extra as object', $record['message']);
+        $this->assertIsArray($record['context']);
+        $this->assertCount(0, $record['context']);
+        $this->assertIsObject($record['extra']);
+        $this->assertObjectHasAttribute('test', $record['extra']);
+        $this->assertIsBool($record['extra']->test);
+        $this->assertTrue($record['extra']->test);
     }
 }
