@@ -56,6 +56,16 @@ final class ParserTest extends TestCase {
         }
     }
 
+    public function testGetAll() {
+        // simply test if any of our testfiles can be parsed without exceptions
+        foreach($this->files as $file) {
+            $parser = new Parser($file);
+            $this->assertTrue($parser->isReady(), 'File '.$file.' is not ready!');
+            $records = $parser->get();
+            $this->assertIsArray($records, 'Parsing results from '.$file.' are not an array!');
+        }
+    }
+
     public function testGetEmergencyLog() {
         // validate with the emergency.log file
         $parser = new Parser($this->files[1]);
