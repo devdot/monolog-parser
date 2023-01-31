@@ -1,0 +1,7 @@
+[2013-08-15 14:19:51] test.INFO: foobar {"foo":"bar"} []
+[2013-08-15 14:19:51] aha.DEBUG: foobar [] []
+[2013-08-15 14:19:51] context.INFO: multicontext [{"foo":"bar"},{"bat":"baz"}] []
+[2013-08-15 14:19:51] context.INFO: multicontext [{"foo":"bar","stuff":"and things"},{"bat":"baz"}] []
+[2013-08-15 14:19:51] context.INFO: multicontext with empty [{"foo":"bar","stuff":"and things"},[]] []
+[2013-08-15 14:19:51] context.INFO: multicontext with spaces [{"foo":"bar","stuff":"and things"},{"bat":"baz"}] []
+[2013-08-15 14:19:51] extra.INFO: context and extra [{"foo":"bar","stuff":"and things"},{"bat":"baz"}] [{"weebl":"bob"},{"lobob":"lo"}]

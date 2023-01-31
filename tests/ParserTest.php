@@ -11,6 +11,7 @@ final class ParserTest extends TestCase {
     protected $files = [
         __DIR__.'/files/test.log',
         __DIR__.'/files/emergency.log',
+        __DIR__.'/files/ddtraceweb-monolog-parser-test.log',
     ];
 
     protected $invalidFiles = [
@@ -191,5 +192,143 @@ final class ParserTest extends TestCase {
         // remove the temp file
         unlink($this->tempFile);  
         $this->assertFileDoesNotExist($this->tempFile, 'Temporary file could not be deleted!');
+    }
+
+    public function testGetDdtraceWebLog() {
+        // using https://github.com/ddtraceweb/monolog-parser/blob/master/tests/files/test.log
+        // load the file and parse it
+        $records = (new Parser($this->files[2]))->get();
+
+        $this->assertCount(7, $records);
+
+        // manually check every detail of the log
+        // LOG #0
+        $record = $records[0];
+        $this->assertInstanceOf(\DateTimeImmutable::class, $record['datetime']);
+        $this->assertEquals('2013-08-15 14:19:51', $record['datetime']->format('Y-m-d H:i:s'));
+        $this->assertEquals('test', $record['channel']);
+        $this->assertEquals('INFO', $record['level']);
+        $this->assertEquals('foobar', $record['message']);
+        $this->assertIsObject($record['context']);
+        $this->assertObjectHasAttribute('foo', $record['context']);
+        $this->assertEquals('bar', $record['context']->foo);
+        $this->assertIsArray($record['extra']);
+        $this->assertCount(0, $record['extra']);
+
+        // LOG #1
+        $record = $records[1];
+        $this->assertInstanceOf(\DateTimeImmutable::class, $record['datetime']);
+        $this->assertEquals('2013-08-15 14:19:51', $record['datetime']->format('Y-m-d H:i:s'));
+        $this->assertEquals('aha', $record['channel']);
+        $this->assertEquals('DEBUG', $record['level']);
+        $this->assertEquals('foobar', $record['message']);
+        $this->assertIsArray($record['context']);
+        $this->assertCount(0, $record['context']);
+        $this->assertIsArray($record['extra']);
+        $this->assertCount(0, $record['extra']);
+
+        // LOG #2
+        $record = $records[2];
+        $this->assertInstanceOf(\DateTimeImmutable::class, $record['datetime']);
+        $this->assertEquals('2013-08-15 14:19:51', $record['datetime']->format('Y-m-d H:i:s'));
+        $this->assertEquals('context', $record['channel']);
+        $this->assertEquals('INFO', $record['level']);
+        $this->assertEquals('multicontext', $record['message']);
+        $this->assertIsArray($record['context']);
+        $this->assertCount(2, $record['context']);
+        $this->assertIsObject($record['context'][0]);
+        $this->assertObjectHasAttribute('foo', $record['context'][0]);
+        $this->assertEquals('bar', $record['context'][0]->foo);
+        $this->assertIsObject($record['context'][1]);
+        $this->assertObjectHasAttribute('bat', $record['context'][1]);
+        $this->assertEquals('baz', $record['context'][1]->bat);
+        $this->assertIsArray($record['extra']);
+        $this->assertCount(0, $record['extra']);
+
+        // LOG #3
+        $record = $records[3];
+        $this->assertInstanceOf(\DateTimeImmutable::class, $record['datetime']);
+        $this->assertEquals('2013-08-15 14:19:51', $record['datetime']->format('Y-m-d H:i:s'));
+        $this->assertEquals('context', $record['channel']);
+        $this->assertEquals('INFO', $record['level']);
+        $this->assertEquals('multicontext', $record['message']);
+        $this->assertIsArray($record['context']);
+        $this->assertCount(2, $record['context']);
+        $this->assertIsObject($record['context'][0]);
+        $this->assertObjectHasAttribute('foo', $record['context'][0]);
+        $this->assertEquals('bar', $record['context'][0]->foo);
+        $this->assertObjectHasAttribute('stuff', $record['context'][0]);
+        $this->assertEquals('and things', $record['context'][0]->stuff);
+        $this->assertIsObject($record['context'][1]);
+        $this->assertObjectHasAttribute('bat', $record['context'][1]);
+        $this->assertEquals('baz', $record['context'][1]->bat);
+        $this->assertIsArray($record['extra']);
+        $this->assertCount(0, $record['extra']);
+
+        // LOG #4
+        $record = $records[4];
+        $this->assertInstanceOf(\DateTimeImmutable::class, $record['datetime']);
+        $this->assertEquals('2013-08-15 14:19:51', $record['datetime']->format('Y-m-d H:i:s'));
+        $this->assertEquals('context', $record['channel']);
+        $this->assertEquals('INFO', $record['level']);
+        $this->assertEquals('multicontext with empty', $record['message']);
+        $this->assertIsArray($record['context']);
+        $this->assertCount(2, $record['context']);
+        $this->assertIsObject($record['context'][0]);
+        $this->assertObjectHasAttribute('foo', $record['context'][0]);
+        $this->assertEquals('bar', $record['context'][0]->foo);
+        $this->assertObjectHasAttribute('stuff', $record['context'][0]);
+        $this->assertEquals('and things', $record['context'][0]->stuff);
+        $this->assertIsArray($record['context'][1]);
+        $this->assertCount(0, $record['context'][1]);
+        $this->assertIsArray($record['extra']);
+        $this->assertCount(0, $record['extra']);
+
+        // LOG #5
+        $record = $records[5];
+        $this->assertInstanceOf(\DateTimeImmutable::class, $record['datetime']);
+        $this->assertEquals('2013-08-15 14:19:51', $record['datetime']->format('Y-m-d H:i:s'));
+        $this->assertEquals('context', $record['channel']);
+        $this->assertEquals('INFO', $record['level']);
+        $this->assertEquals('multicontext with spaces', $record['message']);
+        $this->assertIsArray($record['context']);
+        $this->assertCount(2, $record['context']);
+        $this->assertIsObject($record['context'][0]);
+        $this->assertObjectHasAttribute('foo', $record['context'][0]);
+        $this->assertEquals('bar', $record['context'][0]->foo);
+        $this->assertObjectHasAttribute('stuff', $record['context'][0]);
+        $this->assertEquals('and things', $record['context'][0]->stuff);
+        $this->assertIsObject($record['context'][1]);
+        $this->assertObjectHasAttribute('bat', $record['context'][1]);
+        $this->assertEquals('baz', $record['context'][1]->bat);
+        $this->assertIsArray($record['extra']);
+        $this->assertCount(0, $record['extra']);
+
+        // LOG #6
+        $record = $records[6];
+        $this->assertInstanceOf(\DateTimeImmutable::class, $record['datetime']);
+        $this->assertEquals('2013-08-15 14:19:51', $record['datetime']->format('Y-m-d H:i:s'));
+        $this->assertEquals('extra', $record['channel']);
+        $this->assertEquals('INFO', $record['level']);
+        $this->assertEquals('context and extra', $record['message']);
+        $this->assertIsArray($record['context']);
+        $this->assertCount(2, $record['context']);
+        $this->assertIsObject($record['context'][0]);
+        $this->assertObjectHasAttribute('foo', $record['context'][0]);
+        $this->assertEquals('bar', $record['context'][0]->foo);
+        $this->assertObjectHasAttribute('stuff', $record['context'][0]);
+        $this->assertEquals('and things', $record['context'][0]->stuff);
+        $this->assertIsObject($record['context'][1]);
+        $this->assertObjectHasAttribute('bat', $record['context'][1]);
+        $this->assertEquals('baz', $record['context'][1]->bat);
+        $this->assertIsArray($record['extra']);
+        $this->assertCount(2, $record['extra']);
+        $this->assertIsObject($record['extra'][0]);
+        $this->assertObjectHasAttribute('weebl', $record['extra'][0]);
+        $this->assertEquals('bob', $record['extra'][0]->weebl);
+        $this->assertIsObject($record['extra'][1]);
+        $this->assertObjectHasAttribute('lobob', $record['extra'][1]);
+        $this->assertEquals('lo', $record['extra'][1]->lobob);
+
     }
 }
