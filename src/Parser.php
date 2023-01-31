@@ -2,8 +2,6 @@
 
 namespace Devdot\Monolog;
 
-use Monolog\Monolog\LogRecord;
-
 class Parser {
 
     protected array $records;

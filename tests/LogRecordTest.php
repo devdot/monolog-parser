@@ -22,7 +22,6 @@ final class LogRecordTest extends TestCase {
         $this->assertCount(0, $record['context']);
         $this->assertIsArray($record['extra']);
         $this->assertCount(0, $record['extra']);
-        $this->assertNull($record['formatted']);
     }
 
     public function testArrayAccess() {
