@@ -14,6 +14,7 @@ final class ParserTest extends TestCase {
         __DIR__.'/files/ddtraceweb-monolog-parser-test.log',
         __DIR__.'/files/laravel.log',
         __DIR__.'/files/datetime.log',
+        __DIR__.'/files/datetime-laravel.log',
     ];
 
     protected $invalidFiles = [
@@ -223,6 +224,32 @@ final class ParserTest extends TestCase {
             $this->assertIsArray($record['extra']);
             $this->assertCount(0, $record['extra']);
         }
+    }
+
+    public function testGetContextWithDatetimeLaravel() {
+        // testcase where the context contains a datetime string just like the main string
+        $parser = new Parser($this->files[5]);
+        $parser->setPattern(Parser::PATTERN_LARAVEL);
+        $records = $parser->get();
+
+        // some general testing
+        foreach($records as $record) {
+            $this->assertEquals('2023-01-31 12:00:00', $record['datetime']->format('Y-m-d H:i:s'));
+            $this->assertEquals('test', $record['channel']);
+            $this->assertEquals('INFO', $record['level']);
+            $this->assertCount(5, $records);
+            $this->assertIsObject($record['context']);
+            $this->assertObjectHasAttribute('date', $record['context']);
+            $this->assertIsArray($record['extra']);
+            $this->assertCount(0, $record['extra']);
+        }
+
+        // check if all went well
+        $this->assertEquals('[2023-01-01 02:03:04]', $records[0]['context']->date);
+        $this->assertEquals("\n[2023-01-01 02:03:04] more text\n", $records[1]['context']->date);
+        $this->assertEquals("\n[2023-01-01 02:03:04] fail.ERROR: this is part of a string!\n", $records[2]['context']->date);
+        $this->assertEquals('[2023-01-01 02:03:04]', $records[3]['context']->date);
+        $this->assertEquals('2023-01-01 02:03:04', $records[4]['context']->date);
     }
 
     public function testGetDdtraceWebLog() {

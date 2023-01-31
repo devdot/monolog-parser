@@ -1,0 +1,10 @@
+[2023-01-31 12:00:00] test.INFO: datetime string in context {"date":"[2023-01-01 02:03:04]"} 
+[2023-01-31 12:00:00] test.INFO: datetime string in context {"date":"
+[2023-01-01 02:03:04] more text
+"} 
+[2023-01-31 12:00:00] test.INFO: datetime string in context {"date":"
+[2023-01-01 02:03:04] fail.ERROR: this is part of a string!
+"} 
+[2023-01-31 12:00:00] test.INFO: datetime string
+in context {"date":"[2023-01-01 02:03:04]"} 
+[2023-01-31 12:00:00] test.INFO: datetime string in context {"date":"2023-01-01 02:03:04"} 
