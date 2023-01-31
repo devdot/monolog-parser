@@ -12,6 +12,7 @@ final class ParserTest extends TestCase {
         __DIR__.'/files/test.log',
         __DIR__.'/files/emergency.log',
         __DIR__.'/files/ddtraceweb-monolog-parser-test.log',
+        __DIR__.'/files/laravel.log',
     ];
 
     protected $invalidFiles = [
@@ -343,5 +344,80 @@ final class ParserTest extends TestCase {
         $this->assertObjectHasAttribute('test', $record['extra']);
         $this->assertIsBool($record['extra']->test);
         $this->assertTrue($record['extra']->test);
+    }
+
+    public function testGetLaravel() {
+        // using the real log file laravel.log
+        $parser = new Parser($this->files[3]);
+        $parser->setPattern(Parser::PATTERN_LARAVEL);
+        $records = $parser->get();
+
+        // check for the right amount of log entries
+        $count = 66;
+        $this->assertCount($count, $records);
+
+        // build the testing reference
+        $datetimeMin = strtotime('2023-01-26 10:38:04');
+        $datetimeMax = strtotime('2023-01-30 11:50:35');
+        $referenceChannel = array_fill(0, $count, 'local'); // all channels are 'local'
+        $referenceLevel = array_fill(0, $count, 'ERROR'); // set this default
+        // now overwrite the exceptions
+        $exceptionKeys = [11, 12, 14, 15, 17, 18, 20, 21, 23, 24, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 38, 39, 42, 43];
+        array_walk($referenceChannel, fn(&$value, $key) => ($value = in_array($key, $exceptionKeys) ? 'laravel' : $value));
+        array_walk($referenceLevel, fn(&$value, $key) => ($value = in_array($key, $exceptionKeys) ? 'EMERGENCY' : $value));
+        $referenceMessage = [
+            0 => 'Database file at path [laravel] does not exist. Ensure this is an absolute path to the database. (SQL: PRAGMA foreign_keys = ON;)',
+            2 => 'Database file at path [atabase/db.sqlite] does not exist. Ensure this is an absolute path to the database. (SQL: PRAGMA foreign_keys = ON;)',
+            10 => 'htmlspecialchars(): Argument #1 ($string) must be of type string, array given',
+            12 => 'Unable to create configured logger. Using emergency logger.',
+            13 => 'Class "Devdot\LogArtisan\Commands\Storage" not found',
+            19 => 'Unable to retrieve the last_modified for file at location: mnt/d/projects/laravel/storage/logs/laravel.log.',
+            25 => 'Undefined variable $level',
+            27 => 'test',
+            36 => 'foreach() argument must be of type array|object, null given',
+            37 => 'Undefined array key "path"',
+            46 => "Command \"log:test\" is not defined.\n\nDid you mean one of these?\n    log\n    log:show\n    make:test\n    schedule:test", 
+            48 => 'syntax error, unexpected token "return"',
+            49 => 'Using $this when not in object context',
+            65 => 'Class "Dubture\Monolog\Reader\LogReader" not found',
+        ];
+        $referenceContextObject = array_fill(0, $count, true);
+        $referenceContextObject[27] = false;
+        $referenceContextObject[29] = false;
+        $referenceContextObject[31] = false;
+        $referenceContextExceptionLength = [
+            0 => 11917-215, // the string contains 11917 characters, but that includes 215 escaped backslashes \\ which will not remain in the string after it is parsed
+            1 => 11397-191,
+            4 => 11939-215,
+            5 => 832-18-2, // 18 \\ and 2 \"
+            59 => 1448-22-2,
+        ];
+
+        // run through all records and compare them to reference
+        foreach($records as $key => $record) {
+            $msg = 'Log #'.$key.': ';
+            $this->assertInstanceOf(\DateTimeImmutable::class, $record['datetime'], $msg.'DateTime wrong class');
+            $this->assertGreaterThanOrEqual($datetimeMin, $record['datetime']->format('U'), $msg.'DateTime date old');
+            $this->assertLessThanOrEqual($datetimeMax, $record['datetime']->format('U'), $msg.'DateTime date new');
+            $this->assertEquals($referenceChannel[$key], $record['channel'], $msg.'channel wrong');
+            $this->assertEquals($referenceLevel[$key], $record['level'], $msg.'level wrong');
+            
+            // decide how to assert the message
+            if(array_key_exists($key, $referenceMessage))
+                $this->assertEquals($referenceMessage[$key], $record['message'], $msg.'wrong message!');
+
+            if($referenceContextObject[$key]) {
+                $this->assertIsObject($record['context'], $msg.'context is no object');
+                $this->assertObjectHasAttribute('exception', $record['context']);
+            }
+            else {
+                $this->assertIsNotObject($record['context'], $msg.'context is object');
+            }
+
+            // check strlen if it is given
+            if(array_key_exists($key, $referenceContextExceptionLength)) {
+                $this->assertEquals($referenceContextExceptionLength[$key], strlen($record['context']->exception), $msg.'exception length mismatch');
+            }
+        }
     }
 }
