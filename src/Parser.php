@@ -79,13 +79,30 @@ class Parser {
         // iterate through the records and put them into the array
         $this->records = [];
         foreach($matches as $match) {
+            // properly format json so it can run through json decode without errors
+            $contextJson = str_replace(["\r", "\n"], ['', '\n'], $match['context'] ?? '[]');
+            $context = json_decode($contextJson);
+            // make sure the json decode did not fail
+            if($context === null) {
+                throw new Exceptions\LogParsingException($this->file->getFilename(), 'Failed to decode JSON: '.$contextJson);
+                return;
+            }
+            // same for extra
+            $extraJson = str_replace(["\r", "\n"], ['', '\n'], $match['extra'] ?? '[]');
+            $extra = json_decode($extraJson);
+            // make sure the json decode did not fail
+            if($extra === null) {
+                throw new Exceptions\LogParsingException($this->file->getFilename(), 'Failed to decode JSON: '.$extraJson);
+                return;
+            }
+
             $entry = new LogRecord(
                 new \DateTimeImmutable($match['datetime']),
                 $match['channel'] ?? '',
                 $match['level'] ?? '',
                 trim($match['message'] ?? ''),
-                json_decode(str_replace(["\r", "\n"], ['', '\n'], $match['context'] ?? '[]')),
-                json_decode($match['extra'] ?? '[]'),
+                $context,
+                $extra,
             );
             $this->records[] = $entry;
         }
