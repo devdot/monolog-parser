@@ -22,7 +22,7 @@ class Parser {
         "\[(?<datetime>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] ". // find the datetime with a specific Y-m-d H:i:s format between square brackets [] and a tailing space
         "(?<channel>\w+)\.(?<level>\w+): ". // get the channel and log level, they look lilke this: channel.ERROR, follow by colon and space
         "(?<message>.*?)". // get the message, but with the non-greedy selector *? instead of the gready * for any . character (this will catch as few characters as possible until it finds the next part of the pattern)
-        "(?: (?<context>\{.*?\}) $|$)". // get the context. the context is optional, which is why the outer group () starts with the non-capture flag ?: (it will not show in matches). it will either (a) capture a space followed by the context (non-greedy) in curly brackets, an optional space character and end of line, or (b) just the end of line
+        "(?: (?<context>\{.*?\}) $| $)". // get the context. the context is optional, which is why the outer group () starts with the non-capture flag ?: (it will not show in matches). it will either (a) capture a space followed by the context (non-greedy) in curly brackets, an optional space character and end of line, or (b) just the end of line
         "/ms"; // flags: m = multiline, s = . includes newline character
 
     protected string $pattern = self::PATTERN_MONOLOG2;
