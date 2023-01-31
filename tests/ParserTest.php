@@ -13,6 +13,7 @@ final class ParserTest extends TestCase {
         __DIR__.'/files/emergency.log',
         __DIR__.'/files/ddtraceweb-monolog-parser-test.log',
         __DIR__.'/files/laravel.log',
+        __DIR__.'/files/datetime.log',
     ];
 
     protected $invalidFiles = [
@@ -193,6 +194,35 @@ final class ParserTest extends TestCase {
         // remove the temp file
         unlink($this->tempFile);  
         $this->assertFileDoesNotExist($this->tempFile, 'Temporary file could not be deleted!');
+    }
+
+    public function testGetContextWithDatetime() {
+        // testcase where the context contains a datetime string just like the main string
+        $parser = new Parser($this->files[4]);
+        $records = $parser->get();
+
+        // check if all went well
+        $datetime = '2023-01-01 02:03:04';
+        $this->assertCount(3, $records);
+        $this->assertIsObject($records[0]['context']);
+        $this->assertObjectHasAttribute('date', $records[0]['context']);
+        $this->assertEquals('['.$datetime.']', $records[0]['context']->date);
+        $this->assertIsArray($records[1]['context']);
+        $this->assertCount(1, $records[1]['context']);
+        $this->assertEquals($datetime, $records[1]['context'][0]);
+        $this->assertIsArray($records[2]['context']);
+        $this->assertCount(1, $records[2]['context']);
+        $this->assertEquals('['.$datetime.']', $records[2]['context'][0]);
+
+        // some more general testing
+        foreach($records as $record) {
+            $this->assertEquals('2023-01-31 12:00:00', $record['datetime']->format('Y-m-d H:i:s'));
+            $this->assertEquals('test', $record['channel']);
+            $this->assertEquals('INFO', $record['level']);
+            $this->assertEquals('datetime string in context', $record['message']);
+            $this->assertIsArray($record['extra']);
+            $this->assertCount(0, $record['extra']);
+        }
     }
 
     public function testGetDdtraceWebLog() {
