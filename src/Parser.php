@@ -15,7 +15,7 @@ class Parser {
         "(?<message>[^\[\{]+) ". // next up is the message, tailed by a space character
         "(?<context>[\[\{].*[\]\}]) ". // followed by context within either square [] or curly {} brackets, tailed by a space
         "(?<extra>[\[\{].*[\]\}])". // followed by extra within either square [] or curly {} brackets
-        "$/"; // end with endline marker
+        "$/m"; // end with endline marker, flag: m = multiline
     
     public const PATTERN_LARAVEL = 
         "/^". // start with newline

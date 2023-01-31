@@ -166,6 +166,9 @@ final class ParserTest extends TestCase {
         $logger->error($message, $context);
         $timeAfter = time();
 
+        // push second message
+        $logger->warning('test');
+
         // confirm the file was created
         $this->assertFileExists($this->tempFile, 'Temporary file could not be created by Monolog');
 
@@ -173,7 +176,7 @@ final class ParserTest extends TestCase {
         $parser = new Parser($this->tempFile);
         $this->assertTrue($parser->isReady());
         $records = $parser->get();
-        $this->assertCount(1, $records);
+        $this->assertCount(2, $records);
         
         // confirm the entire record
         $record = $records[0];
