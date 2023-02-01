@@ -130,6 +130,14 @@ final class ParserTest extends TestCase {
         }
     }
 
+    public function testSetFilename() {
+        $parser = new Parser();
+        // simply test that the return is the object itself
+        $this->assertSame($parser, $parser->setFilename($this->files['test']));
+        // and that now the file is ready to parse
+        $this->assertTrue($parser->isReady());
+    }
+
     public function testSetPattern() {
         // test the pattern matching setting
         $parser = new Parser();
