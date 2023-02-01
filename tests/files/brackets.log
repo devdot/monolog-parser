@@ -1,0 +1,5 @@
+[2023-01-31 12:00:00] test.INFO: log ["message", "]"] []
+[2023-01-31 12:00:00] test.INFO: log {"test":"}"} []
+[2023-01-31 12:00:00] test.INFO: log {"test":"} ["} {}
+[2023-01-31 12:00:00] test.INFO: log {"test":"]"} {"foo":"} {"}
+[2023-01-31 12:00:00] test.INFO: log {"test":"["} {"foo":"] {"}

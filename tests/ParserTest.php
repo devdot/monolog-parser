@@ -1,6 +1,7 @@
 <?php
 
 use Devdot\Monolog\Exceptions\FileNotFoundException;
+use Devdot\Monolog\Exceptions\LogParsingException;
 use Devdot\Monolog\Exceptions\ParserNotReadyException;
 use PHPUnit\Framework\TestCase;
 use Devdot\Monolog\Parser;
@@ -17,11 +18,16 @@ final class ParserTest extends TestCase {
         'datetime' => __DIR__.'/files/datetime.log',
         'datetime-laravel' => __DIR__.'/files/datetime-laravel.log',
         'monolog2' => __DIR__.'/files/monolog2.log',
+        'brackets' => __DIR__.'/files/brackets.log',
     ];
 
     protected $invalidFiles = [
         __DIR__.'/file.log',
         __DIR__.'/asdf',
+    ];
+
+    protected $exceptionsFiles = [
+        'brackets' => __DIR__.'/files/brackets-fail.log',
     ];
 
     protected $tempFile = __DIR__.'/files/__test.tmp.log';
@@ -794,5 +800,55 @@ final class ParserTest extends TestCase {
         }
         $stream->setFormatter($formatter);
         $stream->handle($message);
+    }
+
+    public function testGetBracketsInJson() {
+        // testcase with square/curly brackets in the strings of test Json
+        $parser = new Parser($this->files['brackets']);
+        $records = $parser->get();
+
+        // make sure the count is right
+        $this->assertCount(5, $records);
+        
+        // do the mass compare
+        $this->assertLogRecords(
+            $records,
+            array_fill(0, count($records), '2023-01-31'),
+            array_fill(0, count($records), 'test'),
+            array_fill(0, count($records), 'INFO'),
+            array_fill(0, count($records), 'log'),
+            ['array', 'object', 'object', 'object', 'object'],
+            ['array', 'array', 'object', 'object', 'object'],
+        );
+    }
+
+    public function testGetBracketsInJsonFail() {
+        // testcase with square/curly brackets in the strings of test Json
+        // these all should fail
+        $parser = new Parser();
+        
+        // load the lines from the file
+        $file = file_get_contents($this->exceptionsFiles['brackets']);
+        $lines = array_filter(explode(PHP_EOL, $file), fn($val) => !empty($val));
+
+        // the exception texts that are expected
+        $exceptions = [
+            'Failed to decode JSON:  {"test":"}',
+            'Failed to decode JSON:  ["message", "]',
+            'Failed to decode JSON:  {"test":"}',
+        ];
+        // prepend the first line of the exception
+        $exceptions = array_map(fn($str) => 'Failed to parse [STRING]'.PHP_EOL.$str, $exceptions);
+
+        foreach($lines as $key => $line) {
+            try {
+                // manually parse line by line
+                $parser->parse($line);
+                $this->assertFalse(true, 'Exception was not fired for log line #'.$key);
+            }
+            catch(LogParsingException $e) {
+                $this->assertSame($exceptions[$key], $e->getMessage(), 'Exception message wrong for log line #'.$key);
+            }
+        }
     }
 }
