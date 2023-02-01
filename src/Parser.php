@@ -61,6 +61,7 @@ class Parser {
 
     public function setPattern(string $pattern) {
         $this->pattern = $pattern;
+        return $this;
     } 
 
     public function get() {

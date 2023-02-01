@@ -118,6 +118,42 @@ final class ParserTest extends TestCase {
         $this->assertIsArray($parser->get());
     }
 
+    public function testSetPattern() {
+        // test the pattern matching setting
+        $parser = new Parser();
+        $this->assertCount(1, $parser->parse('[2020-01-01] test.DEBUG: message  '.PHP_EOL)->get());
+        
+        // set another pattern
+        $parser->setPattern(Parser::PATTERN_MONOLOG2_MULTILINE);
+        $this->assertCount(1, $parser->parse('[2020-01-01] test.DEBUG: message  '.PHP_EOL)->get());
+        
+        // set a stupid pattern
+        $parser->setPattern('/^__\w+$/m');
+        $this->assertCount(0, $parser->parse('[2020-01-01] test.DEBUG: message  '.PHP_EOL)->get());
+        
+        // set an alternative pattern
+        $pattern = '/^\[(?<datetime>.*?)\] (?<message>.*?) \| (?<channel>\w+).(?<level>\w+)$/m';
+        $parser->setPattern($pattern);
+        $this->assertCount(0, $parser->parse('[2020-01-01] test.DEBUG: message  '.PHP_EOL)->get());
+        $records = $parser->parse('[2020-01-01] msg | abc.efg')->get();
+        $this->assertCount(1, $records);
+        $record = $records[0];
+        $this->assertSame('2020-01-01', $record['datetime']->format('Y-m-d'));
+        $this->assertSame('msg', $record['message']);
+        $this->assertSame('abc', $record['channel']);
+        $this->assertSame('efg', $record['level']);
+
+        // this string would not be parsed with normal pattern]
+        $parser->setPattern(Parser::PATTERN_MONOLOG2);
+        $this->assertCount(0, $parser->parse('[2020-01-01] msg | abc.efg')->get());
+
+        // but a normal string works again
+        $this->assertCount(1, $parser->parse('[2020-01-01] test.DEBUG: message')->get());
+
+        // and now just make sure that the return value is the object itself
+        $this->assertSame($parser, $parser->setPattern(''));
+    }
+
     public function testGetAll() {
         // simply test if any of our testfiles can be parsed without exceptions
         foreach($this->files as $file) {
