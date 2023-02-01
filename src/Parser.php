@@ -12,9 +12,9 @@ class Parser {
         "/^". // start with newline
         "\[(?<datetime>.*)\] ". // find the date that is between two brackets []
         "(?<channel>[\w-]+).(?<level>\w+): ". // get the channel and log level, they look lilke this: channel.ERROR, follow by colon and space
-        "(?<message>[^\[\{]+) ". // next up is the message, tailed by a space character
-        "(?<context>[\[\{].*[\]\}]) ". // followed by context within either square [] or curly {} brackets, tailed by a space
-        "(?<extra>[\[\{].*[\]\}])". // followed by extra within either square [] or curly {} brackets
+        "(?<message>[^\[\{\\n]+)". // next up is the message (containing anything except [ or {, nor a new line)
+        "(?:(?<context> (\[.*?\]|\{.*?\}))|)". // followed by a space and anything (non-greedy) in either square [] or curly {} brackets, or nothing at all (skips ahead to line end)
+        "(?:(?<extra> (\[.*\]|\{.*\}))|)". // followed by a space and anything (non-greedy) in either square [] or curly {} brackets, or nothing at all (skips ahead to line end)
         "$/m"; // end with endline marker, flag: m = multiline
     
     public const PATTERN_LARAVEL = 

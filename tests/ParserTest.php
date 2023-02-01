@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Devdot\Monolog\Parser;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use Monolog\Formatter\LineFormatter;
 
 final class ParserTest extends TestCase {
     protected $files = [
@@ -15,6 +16,7 @@ final class ParserTest extends TestCase {
         'laravel' => __DIR__.'/files/laravel.log',
         'datetime' => __DIR__.'/files/datetime.log',
         'datetime-laravel' => __DIR__.'/files/datetime-laravel.log',
+        'monolog2' => __DIR__.'/files/monolog2.log',
     ];
 
     protected $invalidFiles = [
@@ -476,5 +478,247 @@ final class ParserTest extends TestCase {
                 $this->assertEquals($referenceContextExceptionLength[$key], strlen($record['context']->exception), $msg.'exception length mismatch');
             }
         }
+    }
+
+    public function testGetMonolog2() {
+        // $this->buildMonolog2();
+
+        $parser = new Parser($this->files['monolog2']);
+        $records = $parser->get();
+
+        // check if this did work as it should with the default log Monolog2 Pattern
+        // $this->assertCount(14, $records); 
+        $this->assertCount(9, $records); // the default pattern can only find 9 out of 14 because it does not do multiline matching
+        
+        // check through the found records
+        $date = '2023-01-31';
+        $channels = ['log', 'meh', 'meh', 'meh', 'meh', 'core', 'core', 'core', 'core'];
+        $levels = ['WARNING', 'ERROR', 'ERROR', 'ERROR', 'ERROR', 'CRITICAL', 'CRITICAL', 'INFO', 'INFO'];
+        $messages = ['foo', 'foo', 'log', 'log', 'foobar', 'foobar', 'foobar', 'foo bar', 'foo'];
+        $contexts = ['array', 'object', 'array', null, 'array', 'object', 'object', 'array', null];
+        $extras = ['array', 'array', 'object', null, 'object', 'array', 'array', 'array', null];
+
+        foreach($records as $key => $record) {
+            $this->assertSame($date, $record['datetime']->format('Y-m-d'), 'Error at log #'.$key);
+            $this->assertSame($channels[$key], $record['channel'], 'Error at log #'.$key);
+            $this->assertSame($levels[$key], $record['level'], 'Error at log #'.$key);
+            $this->assertSame($messages[$key], $record['message'], 'Error at log #'.$key);
+            switch($contexts[$key]) {
+                case 'array':
+                    $this->assertIsArray($record['context'], 'Error at log #'.$key);
+                    break;
+                case 'object':
+                    $this->assertIsObject($record['context'], 'Error at log #'.$key);
+                    break;
+                case null:
+                    $this->assertIsArray($record['context'], 'Error at log #'.$key);
+                    $this->assertEmpty($record['context'], 'Error at log #'.$key);
+                    break;
+            }
+            switch($extras[$key]) {
+                case 'array':
+                    $this->assertIsArray($record['extra'], 'Error at log #'.$key);
+                    break;
+                case 'object':
+                    $this->assertIsObject($record['extra'], 'Error at log #'.$key);
+                    break;
+                case null:
+                    $this->assertIsArray($record['extra'], 'Error at log #'.$key);
+                    $this->assertEmpty($record['extra'], 'Error at log #'.$key);
+                    break;
+            }
+        }
+
+        // manually confirm more details
+        $this->assertEmpty($records[0]['context']);
+        $this->assertEmpty($records[0]['extra']);
+        $this->assertSame('{"foo":"bar","baz":"qux","bool":false,"null":null}', json_encode($records[1]['context']));
+        $this->assertEmpty($records[1]['extra']);
+        $this->assertEmpty($records[2]['context']);
+        $this->assertObjectHasAttribute('ip', $records[2]['extra']);
+        $this->assertSame('127.0.0.1', $records[2]['extra']->ip);
+        $this->assertEmpty($records[3]['context']);
+        $this->assertEmpty($records[3]['extra']);
+        $this->assertEmpty($records[4]['context']);
+        $this->assertSame('{"foo":{"stdClass":[]},"bar":{"Monolog\\\\Logger":[]},"baz":[],"res":"[resource(stream)]"}', json_encode($records[4]['extra']));
+        $this->assertSame('{"exception":"[object] (RuntimeException(code: 0): Foo at \/mnt\/d\/projects\/components\/monolog-parser\/tests\/ParserTest.php:568)"}', json_encode($records[5]['context']));
+        $this->assertEmpty($records[5]['extra']);
+        $this->assertSame('{"exception":"[object] (RuntimeException(code: 0): Foo at \/mnt\/d\/projects\/components\/monolog-parser\/tests\/ParserTest.php:642)\n[previous exception] [object] (LogicException(code: 0): Wut? at \/mnt\/d\/projects\/components\/monolog-parser\/tests\/ParserTest.php:638)"}', json_encode($records[6]['context']));
+        $this->assertEmpty($records[6]['extra']);
+        $this->assertEmpty($records[7]['context']);
+        $this->assertEmpty($records[7]['extra']);
+        $this->assertEmpty($records[8]['context']);
+        $this->assertEmpty($records[8]['extra']);    
+    }
+
+    private function buildMonolog2() {
+        // this function was used to build the monolog2 test case
+        // using testcases from https://github.com/Seldaek/monolog/blob/2.x/tests/Monolog/Formatter/LineFormatterTest.php
+        $stream = new StreamHandler($this->files['monolog2']);
+
+        // testDefFormatWithString
+        $this->buildMonolog2Helper($stream, new LineFormatter(null, 'Y-m-d'), [
+            'level_name' => 'WARNING',
+            'channel' => 'log',
+            'context' => [],
+            'message' => 'foo',
+            'datetime' => new \DateTimeImmutable,
+            'extra' => [],
+        ]);
+        // testDefFormatWithArrayContext
+        $this->buildMonolog2Helper($stream, new LineFormatter(null, 'Y-m-d'), [
+            'level_name' => 'ERROR',
+            'channel' => 'meh',
+            'message' => 'foo',
+            'datetime' => new \DateTimeImmutable,
+            'extra' => [],
+            'context' => [
+                'foo' => 'bar',
+                'baz' => 'qux',
+                'bool' => false,
+                'null' => null,
+            ],
+        ]);
+        // testDefFormatExtras
+        $this->buildMonolog2Helper($stream, new LineFormatter(null, 'Y-m-d'), [
+            'level_name' => 'ERROR',
+            'channel' => 'meh',
+            'context' => [],
+            'datetime' => new \DateTimeImmutable,
+            'extra' => ['ip' => '127.0.0.1'],
+            'message' => 'log',
+        ]);
+        // testFormatExtras: skip (non-default pattern)
+        // testContextAndExtraOptionallyNotShownIfEmpty
+        $this->buildMonolog2Helper($stream, new LineFormatter(null, 'Y-m-d', false, true), [
+            'level_name' => 'ERROR',
+            'channel' => 'meh',
+            'context' => [],
+            'datetime' => new \DateTimeImmutable,
+            'extra' => [],
+            'message' => 'log',
+        ]);
+        // testContextAndExtraReplacement: skip
+        // testDefFormatWithObject
+        $this->buildMonolog2Helper($stream, new LineFormatter(null, 'Y-m-d'), [
+            'level_name' => 'ERROR',
+            'channel' => 'meh',
+            'context' => [],
+            'datetime' => new \DateTimeImmutable,
+            'extra' => ['foo' => new \stdClass, 'bar' => new Logger('test'), 'baz' => [], 'res' => fopen('php://memory', 'rb')],
+            'message' => 'foobar',
+        ]);
+        // testDefFormatWithException
+        $this->buildMonolog2Helper($stream, new LineFormatter(null, 'Y-m-d'), [
+            'level_name' => 'CRITICAL',
+            'channel' => 'core',
+            'context' => ['exception' => new \RuntimeException('Foo')],
+            'datetime' => new \DateTimeImmutable,
+            'extra' => [],
+            'message' => 'foobar',
+        ]);
+        // testDefFormatWithExceptionAndStacktrace
+        $formatter = new LineFormatter(null, 'Y-m-d');
+        $formatter->includeStacktraces();
+        $this->buildMonolog2Helper($stream, $formatter, [
+            'level_name' => 'CRITICAL',
+            'channel' => 'core',
+            'context' => ['exception' => new \RuntimeException('Foo')],
+            'datetime' => new \DateTimeImmutable,
+            'extra' => [],
+            'message' => 'foobar',
+        ]);
+        // testInlineLineBreaksRespectsEscapedBackslashes (customized)
+        $formatter = new LineFormatter(null, 'Y-m-d');
+        $formatter->allowInlineLineBreaks();
+        $this->buildMonolog2Helper($stream, $formatter, [
+            'level_name' => 'WARNING',
+            'channel' => 'log',
+            'context' => ["test" => "foo\nbar\\name-with-n"],
+            'message' => 'foo',
+            'datetime' => new \DateTimeImmutable,
+            'extra' => [],
+        ]);
+        // testDefFormatWithExceptionAndStacktraceParserFull
+        $formatter = new LineFormatter(null, 'Y-m-d');
+        $formatter->includeStacktraces(true, function ($line) {
+            return $line;
+        });
+        $this->buildMonolog2Helper($stream, $formatter, [
+            'level_name' => 'CRITICAL',
+            'channel' => 'core',
+            'context' => ['exception' => new \RuntimeException('Foo')],
+            'datetime' => new \DateTimeImmutable,
+            'extra' => [],
+            'message' => 'foobar',
+        ]);
+        // testDefFormatWithExceptionAndStacktraceParserCustom
+        $formatter = new LineFormatter(null, 'Y-m-d');
+        $formatter->includeStacktraces(true, function ($line) {
+            if (strpos($line, 'TestCase.php') === false) {
+                return $line;
+            }
+        });
+        $this->buildMonolog2Helper($stream, $formatter, [
+            'level_name' => 'CRITICAL',
+            'channel' => 'core',
+            'context' => ['exception' => new \RuntimeException('Foo')],
+            'datetime' => new \DateTimeImmutable,
+            'extra' => [],
+            'message' => 'foobar',
+        ]);
+        // testDefFormatWithExceptionAndStacktraceParserEmpty
+        $formatter = new LineFormatter(null, 'Y-m-d');
+        $formatter->includeStacktraces(true, function ($line) {
+            return null;
+        });
+        $this->buildMonolog2Helper($stream, $formatter, [
+            'level_name' => 'CRITICAL',
+            'channel' => 'core',
+            'context' => ['exception' => new \RuntimeException('Foo')],
+            'datetime' => new \DateTimeImmutable,
+            'extra' => [],
+            'message' => 'foobar',
+        ]);
+        // testDefFormatWithPreviousException
+        $formatter = new LineFormatter(null, 'Y-m-d');
+        $previous = new \LogicException('Wut?');
+        $this->buildMonolog2Helper($stream, $formatter, [
+            'level_name' => 'CRITICAL',
+            'channel' => 'core',
+            'context' => ['exception' => new \RuntimeException('Foo', 0, $previous)],
+            'datetime' => new \DateTimeImmutable,
+            'extra' => [],
+            'message' => 'foobar',
+        ]);
+        // testDefFormatWithSoapFaultException: skip
+        // testBatchFormat: skip
+        // testFormatShouldStripInlineLineBreaks
+        $this->buildMonolog2Helper($stream, new LineFormatter(null, 'Y-m-d'), [
+            'level_name' => 'INFO',
+            'message' => "foo\nbar",
+            'context' => [],
+            'extra' => [],
+            'channel' => 'core',
+            'datetime' => new \DateTimeImmutable,
+        ]);
+        // testFormatShouldNotStripInlineLineBreaksWhenFlagIsSet
+        $this->buildMonolog2Helper($stream, new LineFormatter(null, 'Y-m-d', true), [
+            'level_name' => 'INFO',
+            'message' => "foo\nbar",
+            'context' => [],
+            'extra' => [],
+            'channel' => 'core',
+            'datetime' => new \DateTimeImmutable,
+        ]);
+    }
+
+    private function buildMonolog2Helper(StreamHandler $stream, LineFormatter $formatter, array $message) {
+        if(!isset($message['level'])) {
+            $level = $message['level_name'];
+            $message['level'] = Logger::getLevels()[$level];
+        }
+        $stream->setFormatter($formatter);
+        $stream->handle($message);
     }
 }

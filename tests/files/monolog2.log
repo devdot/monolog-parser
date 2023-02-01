@@ -1,0 +1,61 @@
+[2023-01-31] log.WARNING: foo [] []
+[2023-01-31] meh.ERROR: foo {"foo":"bar","baz":"qux","bool":false,"null":null} []
+[2023-01-31] meh.ERROR: log [] {"ip":"127.0.0.1"}
+[2023-01-31] meh.ERROR: log  
+[2023-01-31] meh.ERROR: foobar [] {"foo":{"stdClass":[]},"bar":{"Monolog\\Logger":[]},"baz":[],"res":"[resource(stream)]"}
+[2023-01-31] core.CRITICAL: foobar {"exception":"[object] (RuntimeException(code: 0): Foo at /mnt/d/projects/components/monolog-parser/tests/ParserTest.php:568)"} []
+[2023-01-31] core.CRITICAL: foobar {"exception":"[object] (RuntimeException(code: 0): Foo at /mnt/d/projects/components/monolog-parser/tests/ParserTest.php:579)
+[stacktrace]
+#0 /mnt/d/projects/components/monolog-parser/tests/ParserTest.php(484): ParserTest->buildMonolog2()
+#1 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestCase.php(1548): ParserTest->testGetMonolog2()
+#2 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestCase.php(1154): PHPUnit\\Framework\\TestCase->runTest()
+#3 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestResult.php(728): PHPUnit\\Framework\\TestCase->runBare()
+#4 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestCase.php(904): PHPUnit\\Framework\\TestResult->run()
+#5 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestSuite.php(675): PHPUnit\\Framework\\TestCase->run()
+#6 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestSuite.php(675): PHPUnit\\Framework\\TestSuite->run()
+#7 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/TextUI/TestRunner.php(653): PHPUnit\\Framework\\TestSuite->run()
+#8 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/TextUI/Command.php(144): PHPUnit\\TextUI\\TestRunner->run()
+#9 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/TextUI/Command.php(97): PHPUnit\\TextUI\\Command->run()
+#10 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/phpunit(98): PHPUnit\\TextUI\\Command::main()
+#11 /mnt/d/projects/components/monolog-parser/vendor/bin/phpunit(19): include('...')
+#12 {main}
+"} []
+[2023-01-31] log.WARNING: foo {"test":"foo
+bar\\name-with-n"} []
+[2023-01-31] core.CRITICAL: foobar {"exception":"[object] (RuntimeException(code: 0): Foo at /mnt/d/projects/components/monolog-parser/tests/ParserTest.php:603)
+[stacktrace]
+#0 /mnt/d/projects/components/monolog-parser/tests/ParserTest.php(484): ParserTest->buildMonolog2()
+#1 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestCase.php(1548): ParserTest->testGetMonolog2()
+#2 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestCase.php(1154): PHPUnit\\Framework\\TestCase->runTest()
+#3 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestResult.php(728): PHPUnit\\Framework\\TestCase->runBare()
+#4 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestCase.php(904): PHPUnit\\Framework\\TestResult->run()
+#5 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestSuite.php(675): PHPUnit\\Framework\\TestCase->run()
+#6 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestSuite.php(675): PHPUnit\\Framework\\TestSuite->run()
+#7 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/TextUI/TestRunner.php(653): PHPUnit\\Framework\\TestSuite->run()
+#8 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/TextUI/Command.php(144): PHPUnit\\TextUI\\TestRunner->run()
+#9 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/TextUI/Command.php(97): PHPUnit\\TextUI\\Command->run()
+#10 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/phpunit(98): PHPUnit\\TextUI\\Command::main()
+#11 /mnt/d/projects/components/monolog-parser/vendor/bin/phpunit(19): include('...')
+#12 {main}
+"} []
+[2023-01-31] core.CRITICAL: foobar {"exception":"[object] (RuntimeException(code: 0): Foo at /mnt/d/projects/components/monolog-parser/tests/ParserTest.php:618)
+[stacktrace]
+#0 /mnt/d/projects/components/monolog-parser/tests/ParserTest.php(484): ParserTest->buildMonolog2()
+#3 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestResult.php(728): PHPUnit\\Framework\\TestCase->runBare()
+#5 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestSuite.php(675): PHPUnit\\Framework\\TestCase->run()
+#6 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/Framework/TestSuite.php(675): PHPUnit\\Framework\\TestSuite->run()
+#7 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/TextUI/TestRunner.php(653): PHPUnit\\Framework\\TestSuite->run()
+#8 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/TextUI/Command.php(144): PHPUnit\\TextUI\\TestRunner->run()
+#9 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/src/TextUI/Command.php(97): PHPUnit\\TextUI\\Command->run()
+#10 /mnt/d/projects/components/monolog-parser/vendor/phpunit/phpunit/phpunit(98): PHPUnit\\TextUI\\Command::main()
+#11 /mnt/d/projects/components/monolog-parser/vendor/bin/phpunit(19): include('...')
+#12 {main}
+"} []
+[2023-01-31] core.CRITICAL: foobar {"exception":"[object] (RuntimeException(code: 0): Foo at /mnt/d/projects/components/monolog-parser/tests/ParserTest.php:631)
+[stacktrace]
+
+"} []
+[2023-01-31] core.CRITICAL: foobar {"exception":"[object] (RuntimeException(code: 0): Foo at /mnt/d/projects/components/monolog-parser/tests/ParserTest.php:642)\n[previous exception] [object] (LogicException(code: 0): Wut? at /mnt/d/projects/components/monolog-parser/tests/ParserTest.php:638)"} []
+[2023-01-31] core.INFO: foo bar [] []
+[2023-01-31] core.INFO: foo
+bar [] []
