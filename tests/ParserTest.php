@@ -116,6 +116,18 @@ final class ParserTest extends TestCase {
         // we can now load this again, even when the file is not ready
         $this->assertFalse($parser->isReady());
         $this->assertIsArray($parser->get());
+
+        // make sure the return of parse is the object itself
+        $this->assertSame($parser, $parser->parse('test'));
+
+        // empty string should trigger the exception
+        try {
+            $parser->parse('');
+            $this->assertTrue(false, 'Should have triggered exception!');
+        }
+        catch(ParserNotReadyException $e) {
+            $this->assertInstanceOf(ParserNotReadyException::class, $e);
+        }
     }
 
     public function testSetPattern() {
