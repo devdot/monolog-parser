@@ -95,6 +95,23 @@ final class ParserTest extends TestCase {
         }
     }
 
+    public function testParseString() {
+        // check if we can manually parse a string
+        $parser = new Parser();
+        $records = $parser->parse('[2020-01-01] test.DEBUG: message')->get();
+
+        // validate
+        $this->assertCount(1, $records);
+        $record = $records[0];
+        $this->assertSame('test', $record['channel']);
+        $this->assertSame('DEBUG', $record['level']);
+        $this->assertSame('message', $record['message']);
+        
+        // we can now load this again, even when the file is not ready
+        $this->assertFalse($parser->isReady());
+        $this->assertIsArray($parser->get());
+    }
+
     public function testGetAll() {
         // simply test if any of our testfiles can be parsed without exceptions
         foreach($this->files as $file) {

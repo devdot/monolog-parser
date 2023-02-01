@@ -72,17 +72,25 @@ class Parser {
         return $this->records;
     }
         
-    public function parse() {
-        // make sure the file is ready, if not raise an exception
-        if(!$this->isReady()) {
-            throw new Exceptions\ParserNotReadyException();
-            return;
-        }
-
-        // load the file content
+    public function parse(string $string = '') {
+        
+        // let's check if we have a string given to validate
         $str = '';
-        while(!$this->file->eof()) {
-            $str .= $this->file->fgets();
+        if(empty($string)) {
+            // make sure the file is ready, if not raise an exception
+            if(!$this->isReady()) {
+                throw new Exceptions\ParserNotReadyException();
+                return;
+            }
+
+            // load the file content
+            while(!$this->file->eof()) {
+                $str .= $this->file->fgets();
+            }
+        }
+        else {
+            // simply use the provided string
+            $str = $string;
         }
 
         // parse with regex
@@ -97,7 +105,8 @@ class Parser {
             $context = json_decode($contextJson);
             // make sure the json decode did not fail
             if($context === null) {
-                throw new Exceptions\LogParsingException($this->file->getFilename(), 'Failed to decode JSON: '.$contextJson);
+                $filename = isset($this->file) ? $this->file->getFilename() : '[STRING]';
+                throw new Exceptions\LogParsingException($filename, 'Failed to decode JSON: '.$contextJson);
                 return;
             }
             // same for extra
@@ -105,7 +114,8 @@ class Parser {
             $extra = json_decode($extraJson);
             // make sure the json decode did not fail
             if($extra === null) {
-                throw new Exceptions\LogParsingException($this->file->getFilename(), 'Failed to decode JSON: '.$extraJson);
+                $filename = isset($this->file) ? $this->file->getFilename() : '[STRING]';
+                throw new Exceptions\LogParsingException($filename, 'Failed to decode JSON: '.$extraJson);
                 return;
             }
 
@@ -120,7 +130,7 @@ class Parser {
             $this->records[] = $entry;
         }
 
-        return;
+        return $this;
     }
 
     protected function initializeFileObject(string $filename) {
