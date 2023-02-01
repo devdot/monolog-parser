@@ -516,6 +516,30 @@ final class ParserTest extends TestCase {
     public function testGetMonolog2() {
         // $this->buildMonolog2();
 
+        // define the records to be compared
+        $dates = array_fill(0, 16, '2023-01-31');
+        $channels = ['log', 'meh', 'meh', 'meh', 'meh', 'core', 'core', 'log', 'core', 'core', 'core', 'core', 'core', 'core', 'argh', 'argh'];
+        $levels = ['WARNING', 'ERROR', 'ERROR', 'ERROR', 'ERROR', 'CRITICAL', 'CRITICAL', 'WARNING', 'CRITICAL', 'CRITICAL', 'CRITICAL', 'CRITICAL', 'INFO', 'INFO', 'ERROR', 'ERROR'];
+        $messages = ['foo', 'foo', 'log', 'log', 'foobar', 'foobar', 'foobar', 'foo', 'foobar', 'foobar', 'foobar', 'foobar', 'foo bar', 'foo'.PHP_EOL.'bar', 'dip', 'log'];
+        $contexts = ['array', 'object', 'array', null, 'array', 'object', 'object', 'object', 'object', 'object', 'object', 'object', 'array', 'array', 'object', 'array'];
+        $extras = ['array', 'array', 'object', null, 'object', 'array', 'array', 'array', 'array', 'array', 'array', 'array', 'array', 'array', null, null];
+
+        // run the file with multiline pattern parsing
+        $parser = new Parser($this->files['monolog2']);
+        $parser->setPattern(Parser::PATTERN_MONOLOG2_MULTILINE);
+        $records = $parser->get();
+
+        // make sure that the multiline pattern catches all
+        $this->assertCount(16, $records);
+
+        // run mass assert
+        $this->assertLogRecords($records, $dates, $channels, $levels, $messages, $contexts, $extras);
+
+        // manually assert a handful multiline logs
+        $this->assertEquals(1666-18, strlen($records[6]['context']->exception)); // strlen: 1666 characters in log, but thereof 18 \\ can be subtracted after parsing
+        $this->assertEquals("foo\nbar\\name-with-n", $records[7]['context']->test);
+
+        // now run comparison with default pattern (which will not catch all)
         $parser = new Parser($this->files['monolog2']);
         $records = $parser->get();
 
@@ -523,13 +547,21 @@ final class ParserTest extends TestCase {
         // $this->assertCount(16, $records); 
         $this->assertCount(11, $records); // the default pattern can only find 11 out of 16 because it does not do multiline matching
         
-        // check through the found records
-        $dates = array_fill(0, 11, '2023-01-31');
-        $channels = ['log', 'meh', 'meh', 'meh', 'meh', 'core', 'core', 'core', 'core', 'argh', 'argh'];
-        $levels = ['WARNING', 'ERROR', 'ERROR', 'ERROR', 'ERROR', 'CRITICAL', 'CRITICAL', 'INFO', 'INFO', 'ERROR', 'ERROR'];
-        $messages = ['foo', 'foo', 'log', 'log', 'foobar', 'foobar', 'foobar', 'foo bar', 'foo', 'dip', 'log'];
-        $contexts = ['array', 'object', 'array', null, 'array', 'object', 'object', 'array', null, 'object', 'array'];
-        $extras = ['array', 'array', 'object', null, 'object', 'array', 'array', 'array', null, null, null];
+        // define the multiline entries that would not be found with the default string
+        $multiline = [6, 7, 8, 9, 10];
+
+        // change some entries because they will be parsed differently without multiline support
+        $messages[13] = 'foo';
+        $contexts[13] = null;
+        $extras[13] = null;
+
+        // reduce the arrays down to the entries without multiline
+        $dates = array_merge(array_filter($dates, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
+        $channels = array_merge(array_filter($channels, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
+        $levels = array_merge(array_filter($levels, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
+        $messages = array_merge(array_filter($messages, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
+        $contexts = array_merge(array_filter($contexts, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
+        $extras = array_merge(array_filter($extras, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
 
         $this->assertLogRecords($records, $dates, $channels, $levels, $messages, $contexts, $extras);
 

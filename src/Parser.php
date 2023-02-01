@@ -16,6 +16,17 @@ class Parser {
         "(?:(?<context> (\[.*?\]|\{.*?\}))|)". // followed by a space and anything (non-greedy) in either square [] or curly {} brackets, or nothing at all (skips ahead to line end)
         "(?:(?<extra> (\[.*\]|\{.*\}))|)". // followed by a space and anything (non-greedy) in either square [] or curly {} brackets, or nothing at all (skips ahead to line end)
         "\s{0,2}$/m"; // end with up to 2 optional spaces and the endline marker, flag: m = multiline
+
+    public const PATTERN_MONOLOG2_MULTILINE = // same as PATTERN_MONOLOG2 except for annotated changed
+        "/^".
+        "\[(?<datetime>[^\]]*)\] ". // allow anything until the first closing bracket ]
+        "(?<channel>[\w-]+).(?<level>\w+): ".
+        "(?<message>[^\[\{]+)". // allow \n character in message string
+        "(?:(?<context> (\[.*?\]|\{.*?\}))|)".
+        "(?:(?<extra> (\[.*?\]|\{.*?\}))|)". // . has to be non-greedy so it doesn't take everything in
+        "\s{0,2}$".
+        "(?=\\n(?:\[|\z))". // use look-ahead to match (a) a following newline and opening bracket [ (that would signal the next log entry)
+        "/ms"; // flags: m = multiline, s = . includes newline character
     
     public const PATTERN_LARAVEL = 
         "/^". // start with newline
