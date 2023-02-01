@@ -26,6 +26,39 @@ final class ParserTest extends TestCase {
 
     protected $tempFile = __DIR__.'/files/__test.tmp.log';
 
+    public function assertLogRecords(array $records, array $dates, array $channels, array $levels, array $messages, array $contexts, array $extras, string $errorMsg = 'Error validating log record %s: %s failed') {
+        foreach($records as $key => $record) {
+            $this->assertSame($dates[$key], $record['datetime']->format('Y-m-d'), sprintf($errorMsg, $key, 'datetime'));
+            $this->assertSame($channels[$key], $record['channel'], sprintf($errorMsg, $key, 'channel'));
+            $this->assertSame($levels[$key], $record['level'], sprintf($errorMsg, $key, 'level'));
+            $this->assertSame($messages[$key], $record['message'], sprintf($errorMsg, $key, 'message'));
+            switch($contexts[$key]) {
+                case 'array':
+                    $this->assertIsArray($record['context'], sprintf($errorMsg, $key, 'context not array'));
+                    break;
+                case 'object':
+                    $this->assertIsObject($record['context'], sprintf($errorMsg, $key, 'context not object'));
+                    break;
+                case null:
+                    $this->assertIsArray($record['context'], sprintf($errorMsg, $key, 'context not array'));
+                    $this->assertEmpty($record['context'], sprintf($errorMsg, $key, 'context not empty'));
+                    break;
+            }
+            switch($extras[$key]) {
+                case 'array':
+                    $this->assertIsArray($record['extra'], sprintf($errorMsg, $key, 'extra not array'));
+                    break;
+                case 'object':
+                    $this->assertIsObject($record['extra'], sprintf($errorMsg, $key, 'extra not object'));
+                    break;
+                case null:
+                    $this->assertIsArray($record['extra'], sprintf($errorMsg, $key, 'extra not array'));
+                    $this->assertEmpty($record['extra'], sprintf($errorMsg, $key, 'extra not empty'));
+                    break;
+            }
+        }
+    }
+
     public function testConstruct() {
         // normal construction
         $parser = new Parser();
@@ -491,43 +524,14 @@ final class ParserTest extends TestCase {
         $this->assertCount(11, $records); // the default pattern can only find 11 out of 16 because it does not do multiline matching
         
         // check through the found records
-        $date = '2023-01-31';
+        $dates = array_fill(0, 11, '2023-01-31');
         $channels = ['log', 'meh', 'meh', 'meh', 'meh', 'core', 'core', 'core', 'core', 'argh', 'argh'];
         $levels = ['WARNING', 'ERROR', 'ERROR', 'ERROR', 'ERROR', 'CRITICAL', 'CRITICAL', 'INFO', 'INFO', 'ERROR', 'ERROR'];
         $messages = ['foo', 'foo', 'log', 'log', 'foobar', 'foobar', 'foobar', 'foo bar', 'foo', 'dip', 'log'];
         $contexts = ['array', 'object', 'array', null, 'array', 'object', 'object', 'array', null, 'object', 'array'];
         $extras = ['array', 'array', 'object', null, 'object', 'array', 'array', 'array', null, null, null];
 
-        foreach($records as $key => $record) {
-            $this->assertSame($date, $record['datetime']->format('Y-m-d'), 'Error at log #'.$key);
-            $this->assertSame($channels[$key], $record['channel'], 'Error at log #'.$key);
-            $this->assertSame($levels[$key], $record['level'], 'Error at log #'.$key);
-            $this->assertSame($messages[$key], $record['message'], 'Error at log #'.$key);
-            switch($contexts[$key]) {
-                case 'array':
-                    $this->assertIsArray($record['context'], 'Error at log #'.$key);
-                    break;
-                case 'object':
-                    $this->assertIsObject($record['context'], 'Error at log #'.$key);
-                    break;
-                case null:
-                    $this->assertIsArray($record['context'], 'Error at log #'.$key);
-                    $this->assertEmpty($record['context'], 'Error at log #'.$key);
-                    break;
-            }
-            switch($extras[$key]) {
-                case 'array':
-                    $this->assertIsArray($record['extra'], 'Error at log #'.$key);
-                    break;
-                case 'object':
-                    $this->assertIsObject($record['extra'], 'Error at log #'.$key);
-                    break;
-                case null:
-                    $this->assertIsArray($record['extra'], 'Error at log #'.$key);
-                    $this->assertEmpty($record['extra'], 'Error at log #'.$key);
-                    break;
-            }
-        }
+        $this->assertLogRecords($records, $dates, $channels, $levels, $messages, $contexts, $extras);
 
         // manually confirm more details
         $this->assertEmpty($records[0]['context']);
