@@ -59,3 +59,5 @@ bar\\name-with-n"} []
 [2023-01-31] core.INFO: foo bar [] []
 [2023-01-31] core.INFO: foo
 bar [] []
+[2023-01-31] argh.ERROR: dip {"foo":"bar"} 
+[2023-01-31] argh.ERROR: log  ["foo","wizz"]

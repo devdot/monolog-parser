@@ -487,16 +487,16 @@ final class ParserTest extends TestCase {
         $records = $parser->get();
 
         // check if this did work as it should with the default log Monolog2 Pattern
-        // $this->assertCount(14, $records); 
-        $this->assertCount(9, $records); // the default pattern can only find 9 out of 14 because it does not do multiline matching
+        // $this->assertCount(16, $records); 
+        $this->assertCount(11, $records); // the default pattern can only find 11 out of 16 because it does not do multiline matching
         
         // check through the found records
         $date = '2023-01-31';
-        $channels = ['log', 'meh', 'meh', 'meh', 'meh', 'core', 'core', 'core', 'core'];
-        $levels = ['WARNING', 'ERROR', 'ERROR', 'ERROR', 'ERROR', 'CRITICAL', 'CRITICAL', 'INFO', 'INFO'];
-        $messages = ['foo', 'foo', 'log', 'log', 'foobar', 'foobar', 'foobar', 'foo bar', 'foo'];
-        $contexts = ['array', 'object', 'array', null, 'array', 'object', 'object', 'array', null];
-        $extras = ['array', 'array', 'object', null, 'object', 'array', 'array', 'array', null];
+        $channels = ['log', 'meh', 'meh', 'meh', 'meh', 'core', 'core', 'core', 'core', 'argh', 'argh'];
+        $levels = ['WARNING', 'ERROR', 'ERROR', 'ERROR', 'ERROR', 'CRITICAL', 'CRITICAL', 'INFO', 'INFO', 'ERROR', 'ERROR'];
+        $messages = ['foo', 'foo', 'log', 'log', 'foobar', 'foobar', 'foobar', 'foo bar', 'foo', 'dip', 'log'];
+        $contexts = ['array', 'object', 'array', null, 'array', 'object', 'object', 'array', null, 'object', 'array'];
+        $extras = ['array', 'array', 'object', null, 'object', 'array', 'array', 'array', null, null, null];
 
         foreach($records as $key => $record) {
             $this->assertSame($date, $record['datetime']->format('Y-m-d'), 'Error at log #'.$key);
@@ -549,6 +549,9 @@ final class ParserTest extends TestCase {
         $this->assertEmpty($records[7]['extra']);
         $this->assertEmpty($records[8]['context']);
         $this->assertEmpty($records[8]['extra']);    
+        $this->assertObjectHasAttribute('foo', $records[9]['context']);
+        $this->assertSame('bar', $records[9]['context']->foo);
+        $this->assertCount(2, $records[10]['context']);
     }
 
     private function buildMonolog2() {
@@ -710,6 +713,24 @@ final class ParserTest extends TestCase {
             'extra' => [],
             'channel' => 'core',
             'datetime' => new \DateTimeImmutable,
+        ]);
+        // custom test: optional context/extra with only context
+        $this->buildMonolog2Helper($stream, new LineFormatter(null, 'Y-m-d', false, true), [
+            'level_name' => 'ERROR',
+            'channel' => 'argh',
+            'context' => ['foo' => 'bar'],
+            'datetime' => new \DateTimeImmutable,
+            'extra' => [],
+            'message' => 'dip',
+        ]);
+        // custom test: optional context/extra with only extra
+        $this->buildMonolog2Helper($stream, new LineFormatter(null, 'Y-m-d', false, true), [
+            'level_name' => 'ERROR',
+            'channel' => 'argh',
+            'context' => [],
+            'datetime' => new \DateTimeImmutable,
+            'extra' => ['foo', 'wizz'],
+            'message' => 'log',
         ]);
     }
 

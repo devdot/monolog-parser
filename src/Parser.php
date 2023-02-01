@@ -15,7 +15,7 @@ class Parser {
         "(?<message>[^\[\{\\n]+)". // next up is the message (containing anything except [ or {, nor a new line)
         "(?:(?<context> (\[.*?\]|\{.*?\}))|)". // followed by a space and anything (non-greedy) in either square [] or curly {} brackets, or nothing at all (skips ahead to line end)
         "(?:(?<extra> (\[.*\]|\{.*\}))|)". // followed by a space and anything (non-greedy) in either square [] or curly {} brackets, or nothing at all (skips ahead to line end)
-        "$/m"; // end with endline marker, flag: m = multiline
+        "\s{0,2}$/m"; // end with up to 2 optional spaces and the endline marker, flag: m = multiline
     
     public const PATTERN_LARAVEL = 
         "/^". // start with newline
