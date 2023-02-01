@@ -81,6 +81,17 @@ final class ParserTest extends TestCase {
         $parser = new Parser($this->invalidFiles[0]);
     }
 
+    public function testNew() {
+        // test the static accessor
+        $this->assertInstanceOf(Parser::class, Parser::new());
+        
+        // and with params
+        $this->assertTrue(Parser::new($this->files['test'])->isReady());
+
+        // make sure this is NOT a singleton
+        $this->assertNotSame(Parser::new(), Parser::new());
+    }
+
     public function testIsReady() {
         // test false on no filename
         $this->assertFalse((new Parser())->isReady());

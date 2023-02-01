@@ -47,6 +47,10 @@ class Parser {
         }
     }
 
+    public static function new(string $filename = '') {
+        return new self($filename);
+    }
+
     public function setFilename(string $filename) {
         $this->initializeFileObject($filename);
         return $this;
