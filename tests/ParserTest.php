@@ -9,12 +9,12 @@ use Monolog\Handler\StreamHandler;
 
 final class ParserTest extends TestCase {
     protected $files = [
-        __DIR__.'/files/test.log',
-        __DIR__.'/files/emergency.log',
-        __DIR__.'/files/ddtraceweb-monolog-parser-test.log',
-        __DIR__.'/files/laravel.log',
-        __DIR__.'/files/datetime.log',
-        __DIR__.'/files/datetime-laravel.log',
+        'test' => __DIR__.'/files/test.log',
+        'laravel-emergency' => __DIR__.'/files/emergency.log',
+        'ddtraceweb' =>__DIR__.'/files/ddtraceweb-monolog-parser-test.log',
+        'laravel' => __DIR__.'/files/laravel.log',
+        'datetime' => __DIR__.'/files/datetime.log',
+        'datetime-laravel' => __DIR__.'/files/datetime-laravel.log',
     ];
 
     protected $invalidFiles = [
@@ -30,9 +30,9 @@ final class ParserTest extends TestCase {
         $this->assertInstanceOf(Parser::class, $parser);
         
         // with valid filename
-        $parser = new Parser($this->files[0]);
+        $parser = new Parser($this->files['test']);
         $this->assertInstanceOf(Parser::class, $parser);
-        $this->assertTrue($parser->isReady(), 'Testfile '.$this->files[0].' is not ready!');
+        $this->assertTrue($parser->isReady(), 'Testfile '.$this->files['test'].' is not ready!');
 
 
         // with invalid filename
@@ -72,7 +72,7 @@ final class ParserTest extends TestCase {
 
     public function testGetEmergencyLog() {
         // validate with the emergency.log file
-        $parser = new Parser($this->files[1]);
+        $parser = new Parser($this->files['laravel-emergency']);
         $parser->setPattern(Parser::PATTERN_LARAVEL);
         $records = $parser->get();
         $this->assertCount(4, $records);
@@ -199,7 +199,7 @@ final class ParserTest extends TestCase {
 
     public function testGetContextWithDatetime() {
         // testcase where the context contains a datetime string just like the main string
-        $parser = new Parser($this->files[4]);
+        $parser = new Parser($this->files['datetime']);
         $records = $parser->get();
 
         // check if all went well
@@ -228,7 +228,7 @@ final class ParserTest extends TestCase {
 
     public function testGetContextWithDatetimeLaravel() {
         // testcase where the context contains a datetime string just like the main string
-        $parser = new Parser($this->files[5]);
+        $parser = new Parser($this->files['datetime-laravel']);
         $parser->setPattern(Parser::PATTERN_LARAVEL);
         $records = $parser->get();
 
@@ -255,7 +255,7 @@ final class ParserTest extends TestCase {
     public function testGetDdtraceWebLog() {
         // using https://github.com/ddtraceweb/monolog-parser/blob/master/tests/files/test.log
         // load the file and parse it
-        $records = (new Parser($this->files[2]))->get();
+        $records = (new Parser($this->files['ddtraceweb']))->get();
 
         $this->assertCount(8, $records);
 
@@ -405,7 +405,7 @@ final class ParserTest extends TestCase {
 
     public function testGetLaravel() {
         // using the real log file laravel.log
-        $parser = new Parser($this->files[3]);
+        $parser = new Parser($this->files['laravel']);
         $parser->setPattern(Parser::PATTERN_LARAVEL);
         $records = $parser->get();
 
