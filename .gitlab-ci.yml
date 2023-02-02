@@ -1,0 +1,16 @@
+# Select image from https://hub.docker.com/_/php
+image: thomasschaller/php-test
+
+# cache vendor files for increased performance
+cache:
+  paths:
+    - vendor/
+
+before_script:
+  # Install dependencies
+  # - bash ci/docker_install.sh > /dev/null
+  - composer install
+
+phpunit:
+  script:
+    - vendor/bin/phpunit tests
