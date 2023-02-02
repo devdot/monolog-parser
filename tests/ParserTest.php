@@ -135,6 +135,32 @@ final class ParserTest extends TestCase {
         $this->assertSame($parser, $parser->clear());
     }
 
+    public function testParse() {
+        // make sure the function works as intended
+        // each call to parse will 
+        $parser = new Parser($this->files['test']);
+
+        // get the records
+        $this->assertTrue($parser->isReady()); // parser is ready before
+        $records = $parser->parse()->get();
+        $this->assertTrue($parser->isReady()); // parser remains ready after
+        $this->assertIsArray($records);
+        $this->assertInstanceOf(LogRecord::class, $records[0]);
+
+        // when called again, parse shall reparse the file!
+        $recordsAgain = $parser->parse()->get();
+        foreach($records as $key => $record) {
+            $this->assertNotSame($record, $recordsAgain[$key]);
+        }
+
+        // make sure parse returns the parser object for chaining methods
+        $this->assertSame($parser, $parser->parse());
+
+        // and call an exception when the parser is not ready
+        $this->expectException(ParserNotReadyException::class);
+        Parser::new()->parse();
+    }
+
     public function testParseString() {
         // check if we can manually parse a string
         $parser = new Parser();

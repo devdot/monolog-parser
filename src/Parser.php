@@ -108,6 +108,9 @@ class Parser {
             while(!$this->file->eof()) {
                 $str .= $this->file->fgets();
             }
+
+            // rewind the file to the parser remains ready
+            $this->file->rewind();
         }
         else {
             // simply use the provided string

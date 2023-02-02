@@ -1,0 +1,2 @@
+[2020-01-01 18:00:00] debugging.WARNING: this is a message {"foo":"bar"} ["baz","bud"]
+[2020-01-01 18:00:00] debugging.WARNING: test [] []
