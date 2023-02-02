@@ -1,5 +1,5 @@
 # Select image from https://hub.docker.com/_/php
-image: thomasschaller/php-test
+image: thomasschaller/php-test:8.1
 
 # cache vendor files for increased performance
 cache:
