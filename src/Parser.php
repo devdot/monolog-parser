@@ -51,7 +51,7 @@ class Parser {
         return new self($filename);
     }
 
-    public function setFilename(string $filename) {
+    public function setFile(string $filename) {
         $this->initializeFileObject($filename);
         return $this;
     }

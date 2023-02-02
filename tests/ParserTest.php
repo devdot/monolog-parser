@@ -99,13 +99,13 @@ final class ParserTest extends TestCase {
         // test valid files
         foreach($this->files as $filename) {
             $this->assertTrue((new Parser($filename))->isReady(), 'Testfile '.$filename.' is not ready!');
-            $this->assertTrue((new Parser())->setFilename($filename)->isReady(), 'Testfile '.$filename.' is not ready!');
+            $this->assertTrue((new Parser())->setFile($filename)->isReady(), 'Testfile '.$filename.' is not ready!');
         }
         // test invalid files
         foreach($this->invalidFiles as $filename) {
             $parser = new Parser();
             try {
-                $parser->setFilename($filename);
+                $parser->setFile($filename);
             }
             catch(FileNotFoundException $e) {
             }
@@ -164,10 +164,10 @@ final class ParserTest extends TestCase {
         }
     }
 
-    public function testSetFilename() {
+    public function testSetFile() {
         $parser = new Parser();
         // simply test that the return is the object itself
-        $this->assertSame($parser, $parser->setFilename($this->files['test']));
+        $this->assertSame($parser, $parser->setFile($this->files['test']));
         // and that now the file is ready to parse
         $this->assertTrue($parser->isReady());
     }
