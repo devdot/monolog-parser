@@ -3,6 +3,7 @@
 use Devdot\Monolog\Exceptions\FileNotFoundException;
 use Devdot\Monolog\Exceptions\LogParsingException;
 use Devdot\Monolog\Exceptions\ParserNotReadyException;
+use Devdot\Monolog\LogRecord;
 use PHPUnit\Framework\TestCase;
 use Devdot\Monolog\Parser;
 use Monolog\Logger;
@@ -112,6 +113,28 @@ final class ParserTest extends TestCase {
         }
     }
 
+    public function testClear() {
+        // make sure clear really clears the cache, but also doesn't if its not called
+        $parser = new Parser($this->files['test']);
+        $records = $parser->get();
+        $this->assertCount(2, $records);
+        
+        // make sure we get the same when we call get again
+        $recordsAgain = $parser->get();
+        foreach($records as $key => $record) {
+            $this->assertSame($record, $recordsAgain[$key]);
+        }
+
+        // and now clear the parser
+        $recordsAgain = $parser->clear()->get();
+        foreach($records as $key => $record) {
+            $this->assertNotSame($record, $recordsAgain[$key]);
+        }
+
+        // make sure clear returns the instance itself
+        $this->assertSame($parser, $parser->clear());
+    }
+
     public function testParseString() {
         // check if we can manually parse a string
         $parser = new Parser();
@@ -183,6 +206,54 @@ final class ParserTest extends TestCase {
 
         // and now just make sure that the return value is the object itself
         $this->assertSame($parser, $parser->setPattern(''));
+    }
+
+    public function testGet() {
+        // basic params of get
+        $parser = new Parser($this->files['test']);
+        $records = $parser->get();
+        $this->assertCount(2, $records);
+
+        // check if records returns the same when get is called again
+        $recordsAgain = $parser->get();
+        foreach($records as $key => $record) {
+            $this->assertSame($record, $recordsAgain[$key]);
+        }
+
+        // make sure true is default
+        $recordsAgain = $parser->get(true);
+        foreach($records as $key => $record) {
+            $this->assertSame($record, $recordsAgain[$key]);
+        }
+
+        // and confirm that false is deleting the cache
+        $recordsAgain = $parser->get(false);
+        foreach($records as $key => $record) {
+            $this->assertNotSame($record, $recordsAgain[$key]);
+        }
+
+        // now confirm that get will fail when nothing is provided
+        try {
+            Parser::new()->get();
+            $this->assertFalse(true, 'Exception was not triggered!');
+        }
+        catch(ParserNotReadyException $e) {
+            $this->assertInstanceOf(ParserNotReadyException::class, $e);
+        }
+
+        // and finally confirm that the return is an array and that it cannot be modified
+        $this->assertIsArray($parser->get());
+        $records = $parser->get();
+        $this->assertIsArray($records);
+        $this->assertInstanceOf(LogRecord::class, $records[0]);
+        unset($records[0]);
+        $this->assertCount(1, $records);
+        $this->assertCount(2, $parser->get());
+        $this->assertInstanceOf(LogRecord::class, $parser->get()[0]);
+        unset($records);
+        $this->assertFalse(isset($records));
+        $this->assertIsArray($parser->get());
+
     }
 
     public function testGetAll() {

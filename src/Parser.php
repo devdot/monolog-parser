@@ -68,13 +68,29 @@ class Parser {
         return $this;
     } 
 
-    public function get() {
+    public function get(bool $returnFromCache = true) {
+        // if we shall not return from cache, clear first
+        if(!$returnFromCache) {
+            $this->clear();
+        }
         // check if we need to parse the records
         if(!isset($this->records)) {
             $this->parse();
         }
         // return the stored records
         return $this->records;
+    }
+
+    public function clear() {
+        // clear the internal cache that was created by the last parse
+        unset($this->records);
+
+        // if a file was set, reset it to file start
+        if(isset($this->file)) {
+            $this->file->rewind();
+        }
+
+        return $this;
     }
         
     public function parse(string $string = '') {
