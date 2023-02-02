@@ -777,6 +777,84 @@ final class ParserTest extends TestCase {
         $this->assertCount(2, $records[10]['context']);
     }
 
+    public function testReadMeExample() {
+        // this testcase only exists to validate that README examples actually work
+    
+        // ## Basic Usage
+        ob_start(fn($buffer) => true);
+        $parser = new Parser($this->files['test']);
+        $records = $parser->get();
+        foreach($records as $record) {
+            printf('Logged %s at %s with message: %s',
+                $record['level'],
+                $record['datetime']->format('Y-m-d H:i:s'),
+                $record['message'],
+            );
+        }
+        $str = ob_get_contents();
+        ob_end_clean();
+        $this->assertSame(
+            'Logged WARNING at 2020-01-01 18:00:00 with message: this is a message'.
+            'Logged WARNING at 2020-01-01 18:00:00 with message: test'
+            , $str);
+
+        $records = Parser::new($this->files['test'])->get();
+        $this->assertCount(2, $records);
+
+        // ### Constructor
+        $parser0 = new Parser();
+        $this->assertInstanceOf(Parser::class, $parser0);
+        $parser1 = Parser::new(); // equivalent to new Parser() 
+        $this->assertInstanceOf(Parser::class, $parser1);
+        $this->assertNotSame($parser0, $parser1);
+
+        // ### Files and Ready state
+        $parser = Parser::new();
+        $parser->setFile($this->files['test']); 
+        $this->assertTrue($parser->isReady());
+
+        // ### Parsing
+        $parser = Parser::new()->setFile($this->files['test']);
+        $records0 = $parser->parse()->get();
+        $records1 = $parser->get();
+        $records2 = $parser->parse()->get();
+        $this->assertCount(2, $records0);
+        $this->assertCount(2, $records1);
+        $this->assertCount(2, $records2);
+        $this->assertSame($records0, $records1);
+        $this->assertNotSame($records0[0], $records2[0]);
+        
+        $parser = Parser::new()->setFile($this->files['test']);
+        $records0 = $parser->get();
+        $records1 = $parser->clear()->get();
+        $records2 = $parser->get(false);
+        $this->assertCount(2, $records0);
+        $this->assertCount(2, $records1);
+        $this->assertCount(2, $records2);
+        $this->assertNotSame($records0[0], $records1[0]);
+        $this->assertNotSame($records1[0], $records2[0]);
+        $this->assertNotSame($records0[0], $records2[0]);
+
+        $parser = new Parser();
+        $records = $parser->parse('[2023-01-01] test.DEBUG: message')->get();
+        $this->assertSame('message', $records[0]['message']);
+
+        // ### Log Records
+        $records = Parser::new($this->files['test'])->get();
+        foreach($records as $record) {
+            $this->assertInstanceOf(\DateTimeImmutable::class, $record['datetime']);
+            $this->assertIsString($record['channel']);
+            $this->assertIsString($record['message']);
+            $this->assertIsNotString($record['context']);
+            $this->assertIsNotString($record['extra']);
+        }
+
+        // ### Patterns
+        $parser = Parser::new()->setPattern(Parser::PATTERN_LARAVEL);
+        $parser->setPattern('/^\[(?<datetime>.*?)\] (?<message>.*?) \| (?<channel>\w+).(?<level>\w+)$/m');
+        $this->assertFalse($parser->isReady());
+    }
+
     private function buildMonolog2() {
         // this function was used to build the monolog2 test case
         // using testcases from https://github.com/Seldaek/monolog/blob/2.x/tests/Monolog/Formatter/LineFormatterTest.php
