@@ -1,6 +1,8 @@
 Monolog Parser
 ==============
 
+![Test Automation](https://github.com/devdot/monolog-parser/actions/workflows/php.yml/badge.svg)
+
 A library for parsing [monolog](https://github.com/Seldaek/monolog) logfiles.
 
 This library is compatible with **Monolog 2** and provides parse options for multiline logs and [Laravel](https://laravel.com/) logfiles.
