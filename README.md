@@ -187,6 +187,7 @@ If not stated otherwise, methods return the object `$this`.
 | `::new` | `string $filename`: see `setFile` | Create a new instance (equivalent to __construct). |
 | `setFile` | `string $filename`: full path to a valid file | Set the file at `$filename`. If the files does not exist, this will throw a `FileNotFoundException`. |
 | `setPattern` | `string $pattern = ''`: regex pattern that will be used by `parse`. | Set the pattern that will be used by `parse` when parsing the logfile. The regex needs to be valid PHP regex with named subpatterns ([see Patterns](#patterns)). |
+| `setOptions` | `int $options`: options for the parser configuration. | Set parsing options with the provided option flags that are [listed here](#parsing-options). |
 | `isReady` | | Returns `true` when the parser is ready to parse, otherwise `false`. This state requires that an existing, readable file to be set. |
 | `parse` | `string` $string: optional string to be parsed instead of a file. | This will parse the given string or the set file (see `setFile`) if `$string` is empty. |
 | `get` | `bool $returnFromCache = true`: optional bool to decided whether cache from previous `parse` or `get` should be returned. | Get the results of the last `parse`. If no results exist, `parse` will be called internally. Set `$returnFromCache` to `false` if you do not want the records to be loaded from cache but to re-parse the file. | 
