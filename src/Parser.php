@@ -94,7 +94,6 @@ class Parser {
     }
         
     public function parse(string $string = '') {
-        
         // let's check if we have a string given to validate
         $str = '';
         if(empty($string)) {
@@ -124,37 +123,32 @@ class Parser {
         // iterate through the records and put them into the array
         $this->records = [];
         foreach($matches as $match) {
-            // properly format json so it can run through json decode without errors
-            $contextJson = str_replace(["\r", "\n"], ['', '\n'], $match['context'] ?? '[]');
-            $context = json_decode($contextJson);
-            // make sure the json decode did not fail
-            if($context === null) {
-                $filename = isset($this->file) ? $this->file->getFilename() : '[STRING]';
-                throw new Exceptions\LogParsingException($filename, 'Failed to decode JSON: '.$contextJson);
-                return;
-            }
-            // same for extra
-            $extraJson = str_replace(["\r", "\n"], ['', '\n'], $match['extra'] ?? '[]');
-            $extra = json_decode($extraJson);
-            // make sure the json decode did not fail
-            if($extra === null) {
-                $filename = isset($this->file) ? $this->file->getFilename() : '[STRING]';
-                throw new Exceptions\LogParsingException($filename, 'Failed to decode JSON: '.$extraJson);
-                return;
-            }
-
             $entry = new LogRecord(
                 new \DateTimeImmutable($match['datetime']),
                 $match['channel'] ?? '',
                 $match['level'] ?? '',
                 trim($match['message'] ?? ''),
-                $context,
-                $extra,
+                $this->processJson($match['context'] ?? '[]'),
+                $this->processJson($match['extra'] ?? '[]'),
             );
             $this->records[] = $entry;
         }
 
         return $this;
+    }
+
+    protected function processJson(string $text) {
+        // process the JSON in either context or option
+        // replace characters to make JSON parsable
+        $json = str_replace(["\r", "\n"], ['', '\n'], $text);
+        $object = json_decode($json);
+        // make sure the json decode did not fail
+        if($object === null) {
+                $filename = isset($this->file) ? $this->file->getFilename() : '[STRING]';
+                throw new Exceptions\LogParsingException($filename, 'Failed to decode JSON: '.$json);
+                return;
+        }
+        return $object;
     }
 
     protected function initializeFileObject(string $filename) {
