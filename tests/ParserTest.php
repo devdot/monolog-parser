@@ -18,6 +18,7 @@ final class ParserTest extends TestCase {
         'laravel' => __DIR__.'/files/laravel.log',
         'datetime' => __DIR__.'/files/datetime.log',
         'datetime-laravel' => __DIR__.'/files/datetime-laravel.log',
+        'datetime-sort' => __DIR__.'/files/datetime-sort.log',
         'monolog2' => __DIR__.'/files/monolog2.log',
         'brackets' => __DIR__.'/files/brackets.log',
     ];
@@ -232,6 +233,150 @@ final class ParserTest extends TestCase {
 
         // and now just make sure that the return value is the object itself
         $this->assertSame($parser, $parser->setPattern(''));
+    }
+
+    public function testSetOptions() {
+        $parser = Parser::new();
+        $this->assertSame($parser, $parser->setOptions(Parser::OPTION_SORT_DATETIME));
+
+        // now make sure the option setting works as expected
+        $parser->setOptions(Parser::OPTION_JSON_AS_TEXT);
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $parser->setOptions(Parser::OPTION_SORT_DATETIME);
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $parser->setOptions(Parser::OPTION_SKIP_EXCEPTIONS);
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $parser->setOptions(Parser::OPTION_NONE);
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        // set multiple at once
+        $parser->setOptions(Parser::OPTION_JSON_AS_TEXT | Parser::OPTION_SKIP_EXCEPTIONS);
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $parser->setOptions(Parser::OPTION_SORT_DATETIME | Parser::OPTION_SKIP_EXCEPTIONS);
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $parser->setOptions(Parser::OPTION_SORT_DATETIME | Parser::OPTION_SKIP_EXCEPTIONS | Parser::OPTION_JSON_AS_TEXT);
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+    }
+
+    public function testOptionSkipExceptions() {
+        // use brackets testcase
+        $parser = Parser::new($this->exceptionsFiles['brackets']);
+
+        // make sure this fails
+        try {
+            $parser->get();
+            $this->assertFalse(true, 'Exception was not triggered.');
+        }
+        catch(LogParsingException $e) {
+            $this->assertInstanceOf(LogParsingException::class, $e);
+        }
+        // and now make sure it doesn't fail
+        $records = $parser->setOptions(Parser::OPTION_SKIP_EXCEPTIONS)->get(false);
+        $this->assertCount(3, $records);
+        $this->assertNull($records[0]['context']);
+        $this->assertNull($records[1]['context']);
+        $this->assertNull($records[2]['context']);
+        $this->assertNull($records[0]['extra']);
+        $this->assertNull($records[1]['extra']);
+        $this->assertNull($records[2]['extra']);
+        $this->assertSame('log', $records[0]['message']);
+        $this->assertSame('log', $records[1]['message']);
+        $this->assertSame('log', $records[2]['message']);
+    }
+
+    public function testOptionJsonAsText() {
+        // use normal test log
+        $parser = Parser::new($this->files['test']);
+        $records = $parser->get();
+        $this->assertIsObject($records[0]['context']);
+        $this->assertIsArray($records[0]['extra']);
+        
+        // now use the option
+        $parser->setOptions(Parser::OPTION_JSON_AS_TEXT);
+        $parser->clear();
+        $records = $parser->get();
+
+        // make sure the JSON was __not__ parsed
+        $this->assertSame('{"foo":"bar"}', $records[0]['context']);
+        $this->assertSame('["baz","bud"]', $records[0]['extra']);
+        $this->assertSame('[]', $records[1]['context']);
+        $this->assertSame('[]', $records[1]['extra']);
+
+        // test the processing of the text with another logfile
+        // the "JSON as text" should be directly decodable
+        $parser = Parser::new($this->files['monolog2'])
+            ->setPattern(Parser::PATTERN_MONOLOG2_MULTILINE)
+            ->setOptions(Parser::OPTION_JSON_AS_TEXT);
+        $records = $parser->get();
+
+        // make sure entry 7 is what we expect
+        $record = $records[7];
+        $this->assertSame('foo', $record['message']);
+        $this->assertSame('WARNING', $record['level']);
+        $this->assertSame('{"test":"foo\nbar\\\\name-with-n"}', $record['context']);
+        $this->assertSame('[]', $record['extra']);
+        $obj = json_decode($record['context']);
+        $this->assertIsObject($obj);
+        $this->assertObjectHasAttribute('test', $obj);
+        $this->assertSame('foo'.PHP_EOL.'bar\name-with-n', $obj->test);
+    }
+
+    public function testOptionSortDatetime() {
+        // use custom logfile for this test
+        $parser = Parser::new($this->files['datetime-sort']);
+        $datetimeFile = [
+            '2023-01-31 12:00:00',
+            '2023-01-01 12:00:00',
+            '2023-01-31 12:00:00',
+            '2023-01-21 12:00:00',
+            '2023-01-01 12:00:00',
+            '2023-01-15 12:00:00',
+        ];
+        $datetimeSorted = [
+            '2023-01-31 12:00:00',
+            '2023-01-31 12:00:00',
+            '2023-01-21 12:00:00',
+            '2023-01-15 12:00:00',
+            '2023-01-01 12:00:00',
+            '2023-01-01 12:00:00',
+        ];
+        
+        // test with sorting
+        $parser->setOptions(Parser::OPTION_SORT_DATETIME);
+        $records = $parser->get();
+        $this->assertCount(6, $records);
+        foreach($records as $key => $record) {
+            $this->assertSame($datetimeSorted[$key], $record['datetime']->format('Y-m-d H:i:s'), 'Sorting failed at #'.$key);
+        }
+        // make sure the sort runs stable
+        $this->assertSame('datetime0', $records[0]['message']);
+        $this->assertSame('datetime2', $records[1]['message']);
+        $this->assertSame('datetime3', $records[2]['message']);
+        $this->assertSame('datetime5', $records[3]['message']);
+        $this->assertSame('datetime1', $records[4]['message']);
+        $this->assertSame('datetime4', $records[5]['message']);
+        
+        // test the normal condition now
+        $parser->setOptions(Parser::OPTION_NONE);
+        $records = $parser->get(false);
+        $this->assertCount(6, $records);
+        foreach($records as $key => $record) {
+            $this->assertSame($datetimeFile[$key], $record['datetime']->format('Y-m-d H:i:s'), 'Normal failed at #'.$key);
+            $this->assertSame('datetime'.$key, $record['message']);
+        }
     }
 
     public function testGet() {
@@ -1092,5 +1237,26 @@ final class ParserTest extends TestCase {
                 $this->assertSame($exceptions[$key], $e->getMessage(), 'Exception message wrong for log line #'.$key);
             }
         }
+
+        // make sure the regex fails in the expected way, using json as text option
+        $parser->clear();
+        $parser->setFile($this->exceptionsFiles['brackets']);
+        $parser->setOptions(Parser::OPTION_JSON_AS_TEXT);
+        $records = $parser->get(); // this should not fail!
+        $this->assertCount(3, $records);
+        $this->assertSame('{"test":"}', $records[0]['context']);
+        $this->assertSame('["} []', $records[0]['extra']);
+        $this->assertSame('["message", "]', $records[1]['context']);
+        $this->assertSame('["] []', $records[1]['extra']);
+        $this->assertSame('{"test":"}', $records[2]['context']);
+        $this->assertSame('{"} {}', $records[2]['extra']);
+    }
+
+    public static function helperGetPrivateProperty($object, $property) {
+        // https://www.yellowduck.be/posts/test-private-and-protected-properties-using-phpunit
+        $reflectedClass = new \ReflectionClass($object);
+        $reflection = $reflectedClass->getProperty($property);
+        $reflection->setAccessible(true);
+        return $reflection->getValue($object);
     }
 }

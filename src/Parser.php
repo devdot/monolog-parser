@@ -40,6 +40,15 @@ class Parser {
 
     protected string $pattern = self::PATTERN_MONOLOG2;
 
+    protected bool $optionSortDatetime = false;
+    protected bool $optionJsonAsText = false;
+    protected bool $optionSkipExceptions = false;
+
+    public const OPTION_NONE            = 0;
+    public const OPTION_SORT_DATETIME   = 0b00000001;
+    public const OPTION_JSON_AS_TEXT    = 0b00000010;
+    public const OPTION_SKIP_EXCEPTIONS = 0b00000100;
+
     public function __construct(string $filename = '') {
         // if we were given a filename, initialize the file right away
         if(!empty($filename)) {
@@ -67,6 +76,15 @@ class Parser {
         $this->pattern = $pattern;
         return $this;
     } 
+
+    public function setOptions(int $options) {
+        // set all the options via bitwise operators
+        $this->optionSortDatetime   = $options & self::OPTION_SORT_DATETIME;
+        $this->optionJsonAsText     = $options & self::OPTION_JSON_AS_TEXT;
+        $this->optionSkipExceptions = $options & self::OPTION_SKIP_EXCEPTIONS;
+        // return the instance
+        return $this;
+    }
 
     public function get(bool $returnFromCache = true) {
         // if we shall not return from cache, clear first
@@ -134,6 +152,11 @@ class Parser {
             $this->records[] = $entry;
         }
 
+        // check if the records ought to be sorted
+        if($this->optionSortDatetime === true) {
+            $this->sortRecords();
+        }
+
         return $this;
     }
 
@@ -141,12 +164,20 @@ class Parser {
         // process the JSON in either context or option
         // replace characters to make JSON parsable
         $json = str_replace(["\r", "\n"], ['', '\n'], $text);
+        // check if we have to parse it anyways
+        if($this->optionJsonAsText) {
+            // just return the trimmed string
+            return trim($json);
+        }
         $object = json_decode($json);
         // make sure the json decode did not fail
         if($object === null) {
+            // only throw an exception if the option allows for it
+            if($this->optionSkipExceptions === false) {
                 $filename = isset($this->file) ? $this->file->getFilename() : '[STRING]';
                 throw new Exceptions\LogParsingException($filename, 'Failed to decode JSON: '.$json);
                 return;
+            }
         }
         return $object;
     }
@@ -162,5 +193,15 @@ class Parser {
         $this->file = new \SplFileObject($filename, 'r');
     }
 
+    protected function sortRecords() {
+        // sort the records that are saved currently
+        // we don't need to sort if there are less than 2 items here
+        if(!isset($this->records) || count($this->records) <= 1) {
+            return;
+        }
 
+        // using the php sort algorithm, sort this
+        // sort DESCending (newest to oldest datetime)
+        usort($this->records, fn($a, $b) => $b['datetime']->format('U') - $a['datetime']->format('U'));
+    }
 }
