@@ -137,12 +137,35 @@ $parser->setPattern('/^\[(?<datetime>.*?)\] (?<message>.*?) \| (?<channel>\w+).(
 - `PATTERN_MONOLOG2_MULTILINE`: will parse most configurations of Monolog's `LineFormatter` with multiline support.
 - `PATTERN_LARAVEL`: will parse Laravel logfiles that were created with the Monolog configuration that is provided by Laravel. 
 
+### Parsing Options
+
+The parsing process can be modified with the following options:
+
+| Option | Description |
+|--------|-------------|
+| `OPTION_SORT_DATETIME` | Sort the records by their timestamps in *descending* order. |
+| `OPTION_JSON_AS_TEXT` | Return the JSON of context and extra as string instead of decoded JSON. Use this option if your logfiles have context or extra fields that cannot be decoded with `json_decode`. |
+| `OPTION_SKIP_EXCEPTIONS` | Skip any [exceptions](#exceptions) that occur during parsing. For example, if the JSON of context cannot be decoded, it will return `null` and will not throw a `LogParsingException`. |
+| `OPTION_NONE` | Reset to default options. |
+
+The options may be set like this:
+
+```php
+$parser = Parser::new();
+// set a single option
+$parser->setOptions(Parser::OPTION_SORT_DATETIME);
+// set multiple options
+$parser->setOptions(Parser::OPTION_SKIP_EXCEPTIONS + Parser::OPTION_JSON_AS_TEXT);
+// reset the parser to default settings
+$parser->setOptions(Parser::OPTION_NONE);
+```
+
 ### Exceptions
 
 Monolog-Parser will throw exceptions as listed below.
 
 - `FileNotFoundException`: Whenever a file is accessed that does not exist, this exception will be thrown. Note: this will happen, when `setFile` is called with a non-existing file.
-- `ParserNotReadyException`: Whenever `parse` or `get` are called while the parser is not ready (`isReady()` is `false`), this exception will be thrown. This is not the case if `parse` is provided with a string.
+- `ParserNotReadyException`: Whenever `parse` or `get` are called while the parser is not ready (`isReady()` is `false`), this exception will be thrown. This is not the case if `parse` is provided with a string or when a [parsing option](#parsing-options) prevents exceptions.
 - `LogParsingException`: Whenever the parsing of a logfile or log record fails, this exception will be thrown. See [Limits and failing logs](#limits-and-failing-logs)
 
 ### Limits and failing logs

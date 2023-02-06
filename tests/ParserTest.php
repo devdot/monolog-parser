@@ -998,6 +998,21 @@ final class ParserTest extends TestCase {
         $parser = Parser::new()->setPattern(Parser::PATTERN_LARAVEL);
         $parser->setPattern('/^\[(?<datetime>.*?)\] (?<message>.*?) \| (?<channel>\w+).(?<level>\w+)$/m');
         $this->assertFalse($parser->isReady());
+
+        // ### Parsing Options
+        $parser = Parser::new();
+        $parser->setOptions(Parser::OPTION_SORT_DATETIME);
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $parser->setOptions(Parser::OPTION_SKIP_EXCEPTIONS + Parser::OPTION_JSON_AS_TEXT);
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $parser->setOptions(Parser::OPTION_NONE);
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
     }
 
     private function buildMonolog2() {
