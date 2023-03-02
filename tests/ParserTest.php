@@ -777,7 +777,7 @@ final class ParserTest extends TestCase {
         $records = $parser->get();
 
         // check for the right amount of log entries
-        $count = 66;
+        $count = 67;
         $this->assertCount($count, $records);
 
         // build the testing reference
