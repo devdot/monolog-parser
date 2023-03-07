@@ -8,8 +8,8 @@ class LogRecord implements \ArrayAccess {
         public readonly string $channel,
         public readonly string $level,
         public readonly string $message,
-        public readonly mixed $context = [],
-        public readonly mixed $extra = [],
+        public readonly array|\stdClass|string|NULL $context = [],
+        public readonly array|\stdClass|string|NULL $extra = [],
     ) {
     }
 
