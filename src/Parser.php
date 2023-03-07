@@ -58,28 +58,28 @@ class Parser {
         }
     }
 
-    public static function new(string $filename = '') {
+    public static function new(string $filename = ''): self {
         return new self($filename);
     }
 
-    public function setFile(string $filename) {
+    public function setFile(string $filename): self {
         $this->initializeFileObject($filename);
         return $this;
     }
 
-    public function isReady() {
+    public function isReady(): bool {
         if(isset($this->file)) {
             return $this->file->isReadable() && $this->file->valid();
         }
         return false;
     }
 
-    public function setPattern(string $pattern) {
+    public function setPattern(string $pattern): self {
         $this->pattern = $pattern;
         return $this;
     } 
 
-    public function setOptions(int $options) {
+    public function setOptions(int $options): self {
         // set all the options via bitwise operators
         $this->optionSortDatetime   = $options & self::OPTION_SORT_DATETIME;
         $this->optionJsonAsText     = $options & self::OPTION_JSON_AS_TEXT;
@@ -89,7 +89,7 @@ class Parser {
         return $this;
     }
 
-    public function get(bool $returnFromCache = true) {
+    public function get(bool $returnFromCache = true): array {
         // if we shall not return from cache, clear first
         if(!$returnFromCache) {
             $this->clear();
@@ -102,7 +102,7 @@ class Parser {
         return $this->records;
     }
 
-    public function clear() {
+    public function clear(): self {
         // clear the internal cache that was created by the last parse
         unset($this->records);
 
@@ -114,14 +114,14 @@ class Parser {
         return $this;
     }
         
-    public function parse(string $string = '') {
+    public function parse(string $string = ''): self|NULL {
         // let's check if we have a string given to validate
         $str = '';
         if(empty($string)) {
             // make sure the file is ready, if not raise an exception
             if(!$this->isReady()) {
                 throw new Exceptions\ParserNotReadyException();
-                return;
+                return null;
             }
 
             // load the file content
@@ -163,7 +163,7 @@ class Parser {
         return $this;
     }
 
-    protected function processJson(string $text) {
+    protected function processJson(string $text): \stdClass|array|string|NULL {
         // process the JSON in either context or option
         // replace characters to make JSON parsable
         $json = str_replace(["\r", "\n"], ['', '\n'], $text);
@@ -184,13 +184,13 @@ class Parser {
             if($this->optionSkipExceptions === false) {
                 $filename = isset($this->file) ? $this->file->getFilename() : '[STRING]';
                 throw new Exceptions\LogParsingException($filename, 'Failed to decode JSON: '.$json);
-                return;
+                return null;
             }
         }
         return $object;
     }
 
-    protected function initializeFileObject(string $filename) {
+    protected function initializeFileObject(string $filename): void {
         // check if this file exists
         if(!file_exists($filename)) {
             throw new Exceptions\FileNotFoundException($filename);
@@ -201,7 +201,7 @@ class Parser {
         $this->file = new \SplFileObject($filename, 'r');
     }
 
-    protected function sortRecords() {
+    protected function sortRecords(): void {
         // sort the records that are saved currently
         // we don't need to sort if there are less than 2 items here
         if(!isset($this->records) || count($this->records) <= 1) {
