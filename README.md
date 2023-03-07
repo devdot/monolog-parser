@@ -144,7 +144,8 @@ The parsing process can be modified with the following options:
 | Option | Description |
 |--------|-------------|
 | `OPTION_SORT_DATETIME` | Sort the records by their timestamps in *descending* order. |
-| `OPTION_JSON_AS_TEXT` | Return the JSON of context and extra as string instead of decoded JSON. Use this option if your logfiles have context or extra fields that cannot be decoded with `json_decode`. |
+| `OPTION_JSON_AS_TEXT` | Return the JSON of context and extra as string instead of decoded JSON. Use this option if your logfiles have context or extra fields that cannot be decoded with `json_decode`. Has priority over `OPTION_JSON_FAIL_SOFT`. |
+| `OPTION_JSON_FAIL_SOFT` | Return the JSON of context and extra as string only if exceptions during JSON decode happen. Use this option if your logfiles may have context or extra fields that cannot be decoded with `json_decode`, or if you don't want to handle exceptions. Has priority over `OPTION_SKIP_EXCEPTIONS`. |
 | `OPTION_SKIP_EXCEPTIONS` | Skip any [exceptions](#exceptions) that occur during parsing. For example, if the JSON of context cannot be decoded, it will return `null` and will not throw a `LogParsingException`. |
 | `OPTION_NONE` | Reset to default options. |
 

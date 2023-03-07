@@ -1,0 +1,5 @@
+[2023-02-28 12:00:00] test.INFO: part {"normal":"yes"} []
+[2023-02-28 12:00:00] test.INFO: part ["test","string"] 
+[2023-02-28 12:00:00] test.INFO: part {"fail":"} {"} {}
+[2023-02-28 12:00:00] test.INFO: part {true:"invalid"} {"test":true}
+[2023-02-28 12:00:00] test.INFO: part {"test":true} {true:"invalid"}

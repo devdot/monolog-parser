@@ -30,6 +30,7 @@ final class ParserTest extends TestCase {
 
     protected $exceptionsFiles = [
         'brackets' => __DIR__.'/files/brackets-fail.log',
+        'partial' => __DIR__.'/files/partial-fail.log',
     ];
 
     protected $tempFile = __DIR__.'/files/__test.tmp.log';
@@ -244,31 +245,47 @@ final class ParserTest extends TestCase {
         $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonFailSoft'));
         $parser->setOptions(Parser::OPTION_SORT_DATETIME);
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
         $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonFailSoft'));
         $parser->setOptions(Parser::OPTION_SKIP_EXCEPTIONS);
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
         $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonFailSoft'));
         $parser->setOptions(Parser::OPTION_NONE);
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonFailSoft'));
+        $parser->setOptions(Parser::OPTION_JSON_FAIL_SOFT);
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonFailSoft'));
         // set multiple at once
         $parser->setOptions(Parser::OPTION_JSON_AS_TEXT | Parser::OPTION_SKIP_EXCEPTIONS);
         $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
         $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
-        $parser->setOptions(Parser::OPTION_SORT_DATETIME | Parser::OPTION_SKIP_EXCEPTIONS);
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonFailSoft'));
+        $parser->setOptions(Parser::OPTION_SORT_DATETIME | Parser::OPTION_SKIP_EXCEPTIONS | Parser::OPTION_JSON_FAIL_SOFT);
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
         $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
         $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonFailSoft'));
         $parser->setOptions(Parser::OPTION_SORT_DATETIME | Parser::OPTION_SKIP_EXCEPTIONS | Parser::OPTION_JSON_AS_TEXT);
         $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
         $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSortDatetime'));
         $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionJsonFailSoft'));
+        $parser->setOptions(Parser::OPTION_JSON_FAIL_SOFT | Parser::OPTION_SKIP_EXCEPTIONS | Parser::OPTION_JSON_AS_TEXT);
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonFailSoft'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
+        $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
     }
 
     public function testOptionSkipExceptions() {
@@ -295,6 +312,84 @@ final class ParserTest extends TestCase {
         $this->assertSame('log', $records[0]['message']);
         $this->assertSame('log', $records[1]['message']);
         $this->assertSame('log', $records[2]['message']);
+    }
+
+    public function testOptionJsonFailSoft() {
+        // use brackets testcase
+        $parser = Parser::new($this->exceptionsFiles['brackets']);
+
+        // make sure this fails
+        try {
+            $parser->get();
+            $this->assertFalse(true, 'Exception was not triggered.');
+        }
+        catch(LogParsingException $e) {
+            $this->assertInstanceOf(LogParsingException::class, $e);
+        }
+
+        // and now this should work flawless
+        $records = $parser->setOptions(Parser::OPTION_JSON_FAIL_SOFT)->get(false);
+        $this->assertCount(3, $records);
+        $this->assertSame('log', $records[0]['message']);
+        $this->assertSame('log', $records[1]['message']);
+        $this->assertSame('log', $records[2]['message']);
+        $this->assertSame('{"test":"}', $records[0]['context']);
+        $this->assertSame('["} []', $records[0]['extra']);
+        $this->assertSame('["message", "]', $records[1]['context']);
+        $this->assertSame('["] []', $records[1]['extra']);
+        $this->assertSame('{"test":"}', $records[2]['context']);
+        $this->assertSame('{"} {}', $records[2]['extra']);
+        
+        // now make sure there are no nulls when this flag is set together with the skip exceptions flag
+        $records = $parser->setOptions(Parser::OPTION_JSON_FAIL_SOFT | Parser::OPTION_SKIP_EXCEPTIONS)->get(false);
+        $this->assertCount(3, $records);
+        $this->assertNotNull($records[0]['context']);
+        $this->assertNotNull($records[0]['extra']);
+        $this->assertNotNull($records[1]['context']);
+        $this->assertNotNull($records[1]['extra']);
+        $this->assertNotNull($records[2]['context']);
+        $this->assertNotNull($records[2]['extra']);
+
+        // partial fail file
+        $parser = Parser::new($this->exceptionsFiles['partial']);
+        $records = $parser->setOptions(Parser::OPTION_JSON_FAIL_SOFT)->get(false);
+        $this->assertCount(5, $records);
+        $this->assertSame('part', $records[0]['message']);
+        $this->assertSame('part', $records[1]['message']);
+        $this->assertSame('part', $records[2]['message']);
+        $this->assertSame('part', $records[3]['message']);
+        $this->assertSame('part', $records[4]['message']);
+        $this->assertIsObject($records[0]['context']);
+        $this->assertSame('yes', $records[0]['context']->normal);
+        $this->assertIsArray($records[0]['extra']);
+        $this->assertIsArray($records[1]['context']);
+        $this->assertSame('string', $records[1]['context'][1]);
+        $this->assertEmpty($records[1]['extra']);
+        $this->assertSame('{"fail":"}', $records[2]['context']);
+        $this->assertSame('{"} {}', $records[2]['extra']);
+        $this->assertSame('{true:"invalid"}', $records[3]['context']);
+        $this->assertNull(json_decode($records[3]['context']));
+        $this->assertIsObject($records[3]['extra']);
+        $this->assertTrue($records[3]['extra']->test);
+        $this->assertIsObject($records[4]['context']);
+        $this->assertTrue($records[4]['context']->test);
+        $this->assertSame('{true:"invalid"}', $records[4]['extra']);
+        $this->assertNull(json_decode($records[4]['extra']));
+
+        // and make sure that this file loads as expected with skip failure
+        $records = $parser->setOptions(Parser::OPTION_JSON_FAIL_SOFT | Parser::OPTION_SKIP_EXCEPTIONS)->get(false);
+        $this->assertCount(5, $records);
+        // the soft fail should have priority
+        $this->assertIsObject($records[4]['context']);
+        $this->assertTrue($records[4]['context']->test);
+        $this->assertSame('{true:"invalid"}', $records[4]['extra']);
+
+        // and check weather json as text takes priority over soft fail
+        $records = $parser->setOptions(Parser::OPTION_JSON_FAIL_SOFT | Parser::OPTION_JSON_AS_TEXT)->get(false);
+        $this->assertCount(5, $records);
+        $this->assertIsNotObject($records[4]['context']);
+        $this->assertSame('{"test":true}', $records[4]['context']);
+        $this->assertSame('{true:"invalid"}', $records[4]['extra']);
     }
 
     public function testOptionJsonAsText() {
@@ -332,6 +427,14 @@ final class ParserTest extends TestCase {
         $this->assertIsObject($obj);
         $this->assertObjectHasAttribute('test', $obj);
         $this->assertSame('foo'.PHP_EOL.'bar\name-with-n', $obj->test);
+
+        // and now check this in combination with the soft fail flag
+        $parser->setOptions(Parser::OPTION_JSON_AS_TEXT | Parser::OPTION_JSON_FAIL_SOFT);
+        $records = $parser->clear()->get();
+        $this->assertIsNotObject($records[0]['context']);
+        $this->assertIsNotArray($records[0]['extra']);
+        $this->assertIsNotArray($records[1]['context']);
+        $this->assertIsNotArray($records[1]['extra']);
     }
 
     public function testOptionSortDatetime() {

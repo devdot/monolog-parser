@@ -43,11 +43,13 @@ class Parser {
     protected bool $optionSortDatetime = false;
     protected bool $optionJsonAsText = false;
     protected bool $optionSkipExceptions = false;
+    protected bool $optionJsonFailSoft = false;
 
     public const OPTION_NONE            = 0;
     public const OPTION_SORT_DATETIME   = 0b00000001;
     public const OPTION_JSON_AS_TEXT    = 0b00000010;
     public const OPTION_SKIP_EXCEPTIONS = 0b00000100;
+    public const OPTION_JSON_FAIL_SOFT  = 0b00001000;
 
     public function __construct(string $filename = '') {
         // if we were given a filename, initialize the file right away
@@ -82,6 +84,7 @@ class Parser {
         $this->optionSortDatetime   = $options & self::OPTION_SORT_DATETIME;
         $this->optionJsonAsText     = $options & self::OPTION_JSON_AS_TEXT;
         $this->optionSkipExceptions = $options & self::OPTION_SKIP_EXCEPTIONS;
+        $this->optionJsonFailSoft   = $options & self::OPTION_JSON_FAIL_SOFT;
         // return the instance
         return $this;
     }
@@ -172,6 +175,11 @@ class Parser {
         $object = json_decode($json);
         // make sure the json decode did not fail
         if($object === null) {
+            // check the soft fail option
+            if($this->optionJsonFailSoft === true) {
+                // now just add the json as text instead of failing, since parsing didn't work
+                return trim($json);
+            }
             // only throw an exception if the option allows for it
             if($this->optionSkipExceptions === false) {
                 $filename = isset($this->file) ? $this->file->getFilename() : '[STRING]';
