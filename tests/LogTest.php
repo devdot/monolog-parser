@@ -180,4 +180,17 @@ final class LogTest extends TestCase
 
         $this->assertSame($record0, $log[1]);
     }
+
+    public function testCastToArray() {
+        $log = $this->makeRandomLog(2);
+        $array = (array) $log;
+        $this->assertCount(2, $log);
+        $this->assertCount(2, $array);
+        $this->assertInstanceOf(Log::class, $log);
+        $this->assertIsArray($array);
+        // compare full
+        foreach($log as $key => $record) {
+            $this->assertSame($record, $array[$key]);
+        }
+    }
 }
