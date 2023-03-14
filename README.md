@@ -103,10 +103,11 @@ $records = $parser->parse('[2023-01-01] test.DEBUG: message')->get();
 
 ### Log Records
 
-The log records returned by `get` are an array of type `LogRecord`. These objects are readonly and can be accessed like this:
+The log records are returned as a `Log` object by `get`. The `Log` is a readonly array containing the records of type `LogRecord`. These objects are readonly too and can be accessed like this:
 
 ```php
 $records = Parser::new('test.log')->get();
+$first = $records[0]; // access the records just like an array
 foreach($records as $record) {
     $record->datetime; // object of type DateTimeImmutable
     $record->channel; // string

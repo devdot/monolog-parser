@@ -1093,6 +1093,8 @@ final class ParserTest extends TestCase {
 
         // ### Log Records
         $records = Parser::new($this->files['test'])->get();
+        $first = $records[0];
+        $this->assertInstanceOf(LogRecord::class, $first);
         foreach($records as $record) {
             $this->assertInstanceOf(\DateTimeImmutable::class, $record->datetime);
             $this->assertIsString($record->channel);
