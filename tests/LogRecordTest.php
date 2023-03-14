@@ -13,15 +13,15 @@ final class LogRecordTest extends TestCase {
         );
 
         $this->assertInstanceOf(LogRecord::class, $record);
-        $this->assertInstanceOf(\DateTimeImmutable::class, $record['datetime']);
-        $this->assertEquals('2023-01-02 08:00:01', $record['datetime']->format('Y-m-d H:i:s'));
-        $this->assertEquals('test-channel', $record['channel']);
-        $this->assertEquals('test-level', $record['level']);
-        $this->assertEquals('test-message', $record['message']);
-        $this->assertIsArray($record['context']);
-        $this->assertCount(0, $record['context']);
-        $this->assertIsArray($record['extra']);
-        $this->assertCount(0, $record['extra']);
+        $this->assertInstanceOf(\DateTimeImmutable::class, $record->datetime);
+        $this->assertEquals('2023-01-02 08:00:01', $record->datetime->format('Y-m-d H:i:s'));
+        $this->assertEquals('test-channel', $record->channel);
+        $this->assertEquals('test-level', $record->level);
+        $this->assertEquals('test-message', $record->message);
+        $this->assertIsArray($record->context);
+        $this->assertCount(0, $record->context);
+        $this->assertIsArray($record->extra);
+        $this->assertCount(0, $record->extra);
     }
 
     public function testArrayAccess() {

@@ -30,9 +30,9 @@ $parser = new Parser('test.log');
 $records = $parser->get();
 foreach($records as $record) {
     printf('Logged %s at %s with message: %s',
-        $record['level'],
-        $record['datetime']->format('Y-m-d H:i:s'),
-        $record['message'],
+        $record->level,
+        $record->datetime->format('Y-m-d H:i:s'),
+        $record->message,
     );
 }
 ```
@@ -108,13 +108,16 @@ The log records returned by `get` are an array of type `LogRecord`. These object
 ```php
 $records = Parser::new('test.log')->get();
 foreach($records as $record) {
-    $record['datetime']; // object of type DateTimeImmutable
-    $record['channel']; // string
-    $record['message']; // string
-    $record['context']; // object, empty array by default (decoded JSON)
-    $record['extra']; // object or array, empty array by default (decoded JSON)
+    $record->datetime; // object of type DateTimeImmutable
+    $record->channel; // string
+    $record->message; // string
+    $record->context; // object, empty array by default (decoded JSON)
+    $record->extra; // object or array, empty array by default (decoded JSON)
 }
 ```
+
+You may also access the `LogRecord` properties like array keys: `$record['datetime']` instead of `$record->datetime`.
+
 For reference, Monolog log records look like this:
 
 ```txt
