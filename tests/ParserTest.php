@@ -4,6 +4,7 @@ use Devdot\Monolog\Exceptions\FileNotFoundException;
 use Devdot\Monolog\Exceptions\LogParsingException;
 use Devdot\Monolog\Exceptions\ParserNotReadyException;
 use Devdot\Monolog\LogRecord;
+use Devdot\Monolog\Log;
 use PHPUnit\Framework\TestCase;
 use Devdot\Monolog\Parser;
 use Monolog\Logger;
@@ -35,7 +36,7 @@ final class ParserTest extends TestCase {
 
     protected $tempFile = __DIR__.'/files/__test.tmp.log';
 
-    public function assertLogRecords(array $records, array $dates, array $channels, array $levels, array $messages, array $contexts, array $extras, string $errorMsg = 'Error validating log record %s: %s failed') {
+    public function assertLogRecords(Log $records, array $dates, array $channels, array $levels, array $messages, array $contexts, array $extras, string $errorMsg = 'Error validating log record %s: %s failed') {
         foreach($records as $key => $record) {
             $this->assertSame($dates[$key], $record['datetime']->format('Y-m-d'), sprintf($errorMsg, $key, 'datetime'));
             $this->assertSame($channels[$key], $record['channel'], sprintf($errorMsg, $key, 'channel'));
@@ -146,7 +147,7 @@ final class ParserTest extends TestCase {
         $this->assertTrue($parser->isReady()); // parser is ready before
         $records = $parser->parse()->get();
         $this->assertTrue($parser->isReady()); // parser remains ready after
-        $this->assertIsArray($records);
+        $this->assertInstanceOf(Log::class, $records);
         $this->assertInstanceOf(LogRecord::class, $records[0]);
 
         // when called again, parse shall reparse the file!
@@ -177,7 +178,7 @@ final class ParserTest extends TestCase {
         
         // we can now load this again, even when the file is not ready
         $this->assertFalse($parser->isReady());
-        $this->assertIsArray($parser->get());
+        $this->assertInstanceOf(Log::class, $parser->get());
 
         // make sure the return of parse is the object itself
         $this->assertSame($parser, $parser->parse('test'));
@@ -516,17 +517,20 @@ final class ParserTest extends TestCase {
         }
 
         // and finally confirm that the return is an array and that it cannot be modified
-        $this->assertIsArray($parser->get());
+        $this->assertInstanceOf(Log::class, $parser->get());
         $records = $parser->get();
-        $this->assertIsArray($records);
+        $this->assertInstanceOf(Log::class, $records);
         $this->assertInstanceOf(LogRecord::class, $records[0]);
-        unset($records[0]);
-        $this->assertCount(1, $records);
+        // get the array behind to do the full check
+        $array = $records->getArrayCopy();
+        $this->assertIsArray($array);
+        unset($array[0]);
+        $this->assertCount(1, $array);
         $this->assertCount(2, $parser->get());
         $this->assertInstanceOf(LogRecord::class, $parser->get()[0]);
-        unset($records);
-        $this->assertFalse(isset($records));
-        $this->assertIsArray($parser->get());
+        unset($array);
+        $this->assertFalse(isset($array));
+        $this->assertIsArray($parser->get()->getArrayCopy());
 
     }
 
@@ -536,7 +540,7 @@ final class ParserTest extends TestCase {
             $parser = new Parser($file);
             $this->assertTrue($parser->isReady(), 'File '.$file.' is not ready!');
             $records = $parser->get();
-            $this->assertIsArray($records, 'Parsing results from '.$file.' are not an array!');
+            $this->assertInstanceOf(Log::class, $records, 'Parsing results from '.$file.' are not an array!');
         }
     }
 

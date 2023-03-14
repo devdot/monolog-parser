@@ -9,7 +9,7 @@ namespace Devdot\Monolog;
  */
 class Parser {
 
-    protected array $records;
+    protected Log $records;
 
     protected \SplFileObject $file;
 
@@ -130,9 +130,9 @@ class Parser {
      * @param bool $returnFromCache Set to false if you do not want the records to be loaded from cache but to re-parse the file.
      * @throws Exceptions\ParserNotReadyException If the parser was not ready to parse (e.g. the file was not set)
      * @throws Exceptions\LogParsingException If there were any errors in parsing the log file, as configured by options.
-     * @return array Array containing the results as LogRecord objects
+     * @return Log Array containing the results as LogRecord objects
      */
-    public function get(bool $returnFromCache = true): array {
+    public function get(bool $returnFromCache = true): Log {
         // if we shall not return from cache, clear first
         if(!$returnFromCache) {
             $this->clear();
@@ -196,7 +196,7 @@ class Parser {
         preg_match_all($this->pattern, $str, $matches, PREG_SET_ORDER, 0);
 
         // iterate through the records and put them into the array
-        $this->records = [];
+        $records = [];
         foreach($matches as $match) {
             $entry = new LogRecord(
                 new \DateTimeImmutable($match['datetime']),
@@ -206,8 +206,11 @@ class Parser {
                 $this->processJson($match['context'] ?? '[]'),
                 $this->processJson($match['extra'] ?? '[]'),
             );
-            $this->records[] = $entry;
+            $records[] = $entry;
         }
+
+        // create the log
+        $this->records = new Log(...$records);
 
         // check if the records ought to be sorted
         if($this->optionSortDatetime === true) {
@@ -262,8 +265,7 @@ class Parser {
             return;
         }
 
-        // using the php sort algorithm, sort this
-        // sort DESCending (newest to oldest datetime)
-        usort($this->records, fn($a, $b) => $b['datetime']->format('U') - $a['datetime']->format('U'));
+        // the log can sort itself
+        $this->records->sortByDatetime();
     }
 }
