@@ -2,6 +2,11 @@
 
 namespace Devdot\Monolog;
 
+/**
+ * Acts as a Monolog Parser, containing access to one logfile.
+ * @author Thomas Kuschan
+ * @copyright (c) 2023
+ */
 class Parser {
 
     protected array $records;
@@ -51,6 +56,11 @@ class Parser {
     public const OPTION_SKIP_EXCEPTIONS = 0b00000100;
     public const OPTION_JSON_FAIL_SOFT  = 0b00001000;
 
+    /**
+     * Create a new instance of Parser.
+     * @param string $filename Absolute path to the existing log file.
+     * @throws Exceptions\FileNotFoundException if the given file cannot be found.
+     */
     public function __construct(string $filename = '') {
         // if we were given a filename, initialize the file right away
         if(!empty($filename)) {
@@ -58,15 +68,31 @@ class Parser {
         }
     }
 
+    /**
+     * Create a new instance (equivalent to __construct).
+     * @param string $filename Absolute path to the existing log file.
+     * @throws Exceptions\FileNotFoundException if the given file cannot be found.
+     * @return Parser
+     */
     public static function new(string $filename = ''): self {
         return new self($filename);
     }
 
+    /**
+     * Set the file at $filename.
+     * @param string $filename Absolute path to the existing log file.
+     * @throws Exceptions\FileNotFoundException if the given file cannot be found.
+     * @return Parser
+     */
     public function setFile(string $filename): self {
         $this->initializeFileObject($filename);
         return $this;
     }
 
+    /**
+     * Returns true when the parser is ready to parse, otherwise false. This state requires that an existing, readable file to be set.
+     * @return bool
+     */
     public function isReady(): bool {
         if(isset($this->file)) {
             return $this->file->isReadable() && $this->file->valid();
@@ -74,11 +100,21 @@ class Parser {
         return false;
     }
 
+    /**
+     * Set the pattern that will be used by parse when parsing the logfile.
+     * @param string $pattern The regex needs to be valid and with named subpatterns.
+     * @return Parser
+     */
     public function setPattern(string $pattern): self {
         $this->pattern = $pattern;
         return $this;
     } 
 
+    /**
+     * Set parsing options with the provided option flags.
+     * @param int $options Provide options with combined binary flags.
+     * @return Parser
+     */
     public function setOptions(int $options): self {
         // set all the options via bitwise operators
         $this->optionSortDatetime   = $options & self::OPTION_SORT_DATETIME;
@@ -89,6 +125,13 @@ class Parser {
         return $this;
     }
 
+    /**
+     * Get the results of the last parse. If no results exist, parse will be called internally.
+     * @param bool $returnFromCache Set to false if you do not want the records to be loaded from cache but to re-parse the file.
+     * @throws Exceptions\ParserNotReadyException If the parser was not ready to parse (e.g. the file was not set)
+     * @throws Exceptions\LogParsingException If there were any errors in parsing the log file, as configured by options.
+     * @return array Array containing the results as LogRecord objects
+     */
     public function get(bool $returnFromCache = true): array {
         // if we shall not return from cache, clear first
         if(!$returnFromCache) {
@@ -102,6 +145,10 @@ class Parser {
         return $this->records;
     }
 
+    /**
+     * Clear the cache from previous parse and rewind the file if it was already read.
+     * @return Parser
+     */
     public function clear(): self {
         // clear the internal cache that was created by the last parse
         unset($this->records);
@@ -113,7 +160,14 @@ class Parser {
 
         return $this;
     }
-        
+
+    /**
+     * This will parse the given string or the set file if $string is empty.
+     * @param string $string If an empty string is provided, the Parser will parse the file that was provided earlier.
+     * @throws Exceptions\ParserNotReadyException If no string was provided and the parser was not ready to parse (e.g. the file was not set)
+     * @throws Exceptions\LogParsingException If there were any errors in parsing the log file, as configured by options.
+     * @return Parser|\NULL
+     */
     public function parse(string $string = ''): self|NULL {
         // let's check if we have a string given to validate
         $str = '';

@@ -2,6 +2,11 @@
 
 namespace Devdot\Monolog;
 
+/**
+ * Structure for holding the properties of a single log record.
+ * @author Thomas Kuschan
+ * @copyright (c) 2023
+ */
 class LogRecord implements \ArrayAccess {
     public function __construct(
         public readonly \DateTimeImmutable $datetime,
