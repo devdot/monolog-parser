@@ -41,10 +41,13 @@ class Log extends \ArrayIterator implements \ArrayAccess {
         return parent::current();
     }
 
-    public function offsetGet($offset): LogRecord {
-        if(parent::offsetExists($offset))
-            return parent::offsetGet($offset);
-        else
+    public function offsetGet(mixed $offset): LogRecord {
+        if(parent::offsetExists($offset)) {
+            $offset = parent::offsetGet($offset);
+            if ($offset !== null)
+                return $offset;
+        }
+        // exit with exception
             throw new \OutOfBoundsException('Undefined array key '.$offset);
     }
 
