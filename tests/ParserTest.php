@@ -529,7 +529,7 @@ final class ParserTest extends TestCase {
         $this->assertCount(2, $parser->get());
         $this->assertInstanceOf(LogRecord::class, $parser->get()[0]);
         unset($array);
-        $this->assertFalse(isset($array));
+        $this->assertFalse(isset($array)); // @phpstan-ignore-line
         $this->assertIsArray($parser->get()->getArrayCopy());
 
     }
@@ -1124,6 +1124,7 @@ final class ParserTest extends TestCase {
         $this->assertFalse(self::helperGetPrivateProperty($parser, 'optionSkipExceptions'));
     }
 
+    // just for building, @phpstan-ignore-next-line
     private function buildMonolog2() {
         // this function was used to build the monolog2 test case
         // using testcases from https://github.com/Seldaek/monolog/blob/2.x/tests/Monolog/Formatter/LineFormatterTest.php

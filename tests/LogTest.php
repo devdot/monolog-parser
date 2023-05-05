@@ -10,9 +10,9 @@ final class LogTest extends TestCase
         return new LogRecord(
             (new \DateTimeImmutable())->setTimestamp($timestamp ?? rand(0, time())),
             'ch'.rand(0, 99),
-            array_rand(['INFO', 'DEBUG', 'ERROR', 'WARNING']),
+            (string) array_rand(['INFO', 'DEBUG', 'ERROR', 'WARNING']),
             'message'.rand(0, 99),
-            ['test' => true],
+            ['test' => true], // this is possible, but not recommended and won't happen with json_decode @phpstan-ignore-line
             (object) ['context' => false]
         );
     }
@@ -65,6 +65,7 @@ final class LogTest extends TestCase
     public function testConstructWithArrayException() {
         // try to pass an array into the constructor and it will fail
         $this->expectException(\TypeError::class);
+        // this should fail, it's not how the constructor is supposed to work @phpstan-ignore-next-line
         $log = new Log([
             $this->makeRandomRecord(),
             $this->makeRandomRecord(),
@@ -80,7 +81,7 @@ final class LogTest extends TestCase
             n: $this->makeRandomRecord(),
             test: $this->makeRandomRecord(),
         );
-        $this->assertTrue($log->offsetExists('test'));
+        $this->assertTrue($log->offsetExists('test')); // this is rightly complained about @phpstan-ignore-line
     }
 
     public function testObjectInterface() {
@@ -149,7 +150,7 @@ final class LogTest extends TestCase
         $log = $this->makeRandomLog(10);
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Unsupported operation');
-        $log[] = $this->makeRandomRecord();
+        $log[] = $this->makeRandomRecord(); // this will throw an exception @phpstan-ignore-line
     }
 
     public function testSortByDatetime() {
