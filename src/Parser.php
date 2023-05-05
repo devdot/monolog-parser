@@ -175,7 +175,6 @@ class Parser {
             // make sure the file is ready, if not raise an exception
             if(!$this->isReady()) {
                 throw new Exceptions\ParserNotReadyException();
-                return null;
             }
 
             // load the file content
@@ -241,7 +240,6 @@ class Parser {
             if($this->optionSkipExceptions === false) {
                 $filename = isset($this->file) ? $this->file->getFilename() : '[STRING]';
                 throw new Exceptions\LogParsingException($filename, 'Failed to decode JSON: '.$json);
-                return null;
             }
         }
         return $object;
@@ -251,7 +249,6 @@ class Parser {
         // check if this file exists
         if(!file_exists($filename)) {
             throw new Exceptions\FileNotFoundException($filename);
-            return;
         }
 
         // initialize the file object
