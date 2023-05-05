@@ -426,7 +426,7 @@ final class ParserTest extends TestCase {
         $this->assertSame('[]', $record['extra']);
         $obj = json_decode($record['context']);
         $this->assertIsObject($obj);
-        $this->assertObjectHasAttribute('test', $obj);
+        $this->assertObjectHasProperty('test', $obj);
         $this->assertSame('foo'.PHP_EOL.'bar\name-with-n', $obj->test);
 
         // and now check this in combination with the soft fail flag
@@ -680,7 +680,7 @@ final class ParserTest extends TestCase {
         $datetime = '2023-01-01 02:03:04';
         $this->assertCount(3, $records);
         $this->assertIsObject($records[0]['context']);
-        $this->assertObjectHasAttribute('date', $records[0]['context']);
+        $this->assertObjectHasProperty('date', $records[0]['context']);
         $this->assertEquals('['.$datetime.']', $records[0]['context']->date);
         $this->assertIsArray($records[1]['context']);
         $this->assertCount(1, $records[1]['context']);
@@ -713,7 +713,7 @@ final class ParserTest extends TestCase {
             $this->assertEquals('INFO', $record['level']);
             $this->assertCount(5, $records);
             $this->assertIsObject($record['context']);
-            $this->assertObjectHasAttribute('date', $record['context']);
+            $this->assertObjectHasProperty('date', $record['context']);
             $this->assertIsArray($record['extra']);
             $this->assertCount(0, $record['extra']);
         }
@@ -742,7 +742,7 @@ final class ParserTest extends TestCase {
         $this->assertEquals('INFO', $record['level']);
         $this->assertEquals('foobar', $record['message']);
         $this->assertIsObject($record['context']);
-        $this->assertObjectHasAttribute('foo', $record['context']);
+        $this->assertObjectHasProperty('foo', $record['context']);
         $this->assertEquals('bar', $record['context']->foo);
         $this->assertIsArray($record['extra']);
         $this->assertCount(0, $record['extra']);
@@ -769,10 +769,10 @@ final class ParserTest extends TestCase {
         $this->assertIsArray($record['context']);
         $this->assertCount(2, $record['context']);
         $this->assertIsObject($record['context'][0]);
-        $this->assertObjectHasAttribute('foo', $record['context'][0]);
+        $this->assertObjectHasProperty('foo', $record['context'][0]);
         $this->assertEquals('bar', $record['context'][0]->foo);
         $this->assertIsObject($record['context'][1]);
-        $this->assertObjectHasAttribute('bat', $record['context'][1]);
+        $this->assertObjectHasProperty('bat', $record['context'][1]);
         $this->assertEquals('baz', $record['context'][1]->bat);
         $this->assertIsArray($record['extra']);
         $this->assertCount(0, $record['extra']);
@@ -787,12 +787,12 @@ final class ParserTest extends TestCase {
         $this->assertIsArray($record['context']);
         $this->assertCount(2, $record['context']);
         $this->assertIsObject($record['context'][0]);
-        $this->assertObjectHasAttribute('foo', $record['context'][0]);
+        $this->assertObjectHasProperty('foo', $record['context'][0]);
         $this->assertEquals('bar', $record['context'][0]->foo);
-        $this->assertObjectHasAttribute('stuff', $record['context'][0]);
+        $this->assertObjectHasProperty('stuff', $record['context'][0]);
         $this->assertEquals('and things', $record['context'][0]->stuff);
         $this->assertIsObject($record['context'][1]);
-        $this->assertObjectHasAttribute('bat', $record['context'][1]);
+        $this->assertObjectHasProperty('bat', $record['context'][1]);
         $this->assertEquals('baz', $record['context'][1]->bat);
         $this->assertIsArray($record['extra']);
         $this->assertCount(0, $record['extra']);
@@ -807,9 +807,9 @@ final class ParserTest extends TestCase {
         $this->assertIsArray($record['context']);
         $this->assertCount(2, $record['context']);
         $this->assertIsObject($record['context'][0]);
-        $this->assertObjectHasAttribute('foo', $record['context'][0]);
+        $this->assertObjectHasProperty('foo', $record['context'][0]);
         $this->assertEquals('bar', $record['context'][0]->foo);
-        $this->assertObjectHasAttribute('stuff', $record['context'][0]);
+        $this->assertObjectHasProperty('stuff', $record['context'][0]);
         $this->assertEquals('and things', $record['context'][0]->stuff);
         $this->assertIsArray($record['context'][1]);
         $this->assertCount(0, $record['context'][1]);
@@ -826,12 +826,12 @@ final class ParserTest extends TestCase {
         $this->assertIsArray($record['context']);
         $this->assertCount(2, $record['context']);
         $this->assertIsObject($record['context'][0]);
-        $this->assertObjectHasAttribute('foo', $record['context'][0]);
+        $this->assertObjectHasProperty('foo', $record['context'][0]);
         $this->assertEquals('bar', $record['context'][0]->foo);
-        $this->assertObjectHasAttribute('stuff', $record['context'][0]);
+        $this->assertObjectHasProperty('stuff', $record['context'][0]);
         $this->assertEquals('and things', $record['context'][0]->stuff);
         $this->assertIsObject($record['context'][1]);
-        $this->assertObjectHasAttribute('bat', $record['context'][1]);
+        $this->assertObjectHasProperty('bat', $record['context'][1]);
         $this->assertEquals('baz', $record['context'][1]->bat);
         $this->assertIsArray($record['extra']);
         $this->assertCount(0, $record['extra']);
@@ -846,20 +846,20 @@ final class ParserTest extends TestCase {
         $this->assertIsArray($record['context']);
         $this->assertCount(2, $record['context']);
         $this->assertIsObject($record['context'][0]);
-        $this->assertObjectHasAttribute('foo', $record['context'][0]);
+        $this->assertObjectHasProperty('foo', $record['context'][0]);
         $this->assertEquals('bar', $record['context'][0]->foo);
-        $this->assertObjectHasAttribute('stuff', $record['context'][0]);
+        $this->assertObjectHasProperty('stuff', $record['context'][0]);
         $this->assertEquals('and things', $record['context'][0]->stuff);
         $this->assertIsObject($record['context'][1]);
-        $this->assertObjectHasAttribute('bat', $record['context'][1]);
+        $this->assertObjectHasProperty('bat', $record['context'][1]);
         $this->assertEquals('baz', $record['context'][1]->bat);
         $this->assertIsArray($record['extra']);
         $this->assertCount(2, $record['extra']);
         $this->assertIsObject($record['extra'][0]);
-        $this->assertObjectHasAttribute('weebl', $record['extra'][0]);
+        $this->assertObjectHasProperty('weebl', $record['extra'][0]);
         $this->assertEquals('bob', $record['extra'][0]->weebl);
         $this->assertIsObject($record['extra'][1]);
-        $this->assertObjectHasAttribute('lobob', $record['extra'][1]);
+        $this->assertObjectHasProperty('lobob', $record['extra'][1]);
         $this->assertEquals('lo', $record['extra'][1]->lobob);
 
         // LOG #7
@@ -872,7 +872,7 @@ final class ParserTest extends TestCase {
         $this->assertIsArray($record['context']);
         $this->assertCount(0, $record['context']);
         $this->assertIsObject($record['extra']);
-        $this->assertObjectHasAttribute('test', $record['extra']);
+        $this->assertObjectHasProperty('test', $record['extra']);
         $this->assertIsBool($record['extra']->test);
         $this->assertTrue($record['extra']->test);
     }
@@ -939,7 +939,7 @@ final class ParserTest extends TestCase {
 
             if($referenceContextObject[$key]) {
                 $this->assertIsObject($record['context'], $msg.'context is no object');
-                $this->assertObjectHasAttribute('exception', $record['context']);
+                $this->assertObjectHasProperty('exception', $record['context']);
             }
             else {
                 $this->assertIsNotObject($record['context'], $msg.'context is object');
@@ -1010,7 +1010,7 @@ final class ParserTest extends TestCase {
         $this->assertSame('{"foo":"bar","baz":"qux","bool":false,"null":null}', json_encode($records[1]['context']));
         $this->assertEmpty($records[1]['extra']);
         $this->assertEmpty($records[2]['context']);
-        $this->assertObjectHasAttribute('ip', $records[2]['extra']);
+        $this->assertObjectHasProperty('ip', $records[2]['extra']);
         $this->assertSame('127.0.0.1', $records[2]['extra']->ip);
         $this->assertEmpty($records[3]['context']);
         $this->assertEmpty($records[3]['extra']);
@@ -1024,7 +1024,7 @@ final class ParserTest extends TestCase {
         $this->assertEmpty($records[7]['extra']);
         $this->assertEmpty($records[8]['context']);
         $this->assertEmpty($records[8]['extra']);    
-        $this->assertObjectHasAttribute('foo', $records[9]['context']);
+        $this->assertObjectHasProperty('foo', $records[9]['context']);
         $this->assertSame('bar', $records[9]['context']->foo);
         $this->assertCount(2, $records[10]['context']);
     }
