@@ -117,10 +117,10 @@ class Parser {
      */
     public function setOptions(int $options): self {
         // set all the options via bitwise operators
-        $this->optionSortDatetime   = $options & self::OPTION_SORT_DATETIME;
-        $this->optionJsonAsText     = $options & self::OPTION_JSON_AS_TEXT;
-        $this->optionSkipExceptions = $options & self::OPTION_SKIP_EXCEPTIONS;
-        $this->optionJsonFailSoft   = $options & self::OPTION_JSON_FAIL_SOFT;
+        $this->optionSortDatetime   = ($options & self::OPTION_SORT_DATETIME) > 0;
+        $this->optionJsonAsText     = ($options & self::OPTION_JSON_AS_TEXT) > 0;
+        $this->optionSkipExceptions = ($options & self::OPTION_SKIP_EXCEPTIONS) > 0;
+        $this->optionJsonFailSoft   = ($options & self::OPTION_JSON_FAIL_SOFT) > 0;
         // return the instance
         return $this;
     }
