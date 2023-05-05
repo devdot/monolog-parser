@@ -115,21 +115,21 @@ final class LogTest extends TestCase
     public function testSetException() {
         $log = $this->makeRandomLog(10);
         $this->expectException(\LogicException::class);
-        $this->expectErrorMessage('Unsupported operation');
+        $this->expectExceptionMessage('Unsupported operation');
         $log[3] = $this->makeRandomRecord();
     }
 
     public function testUnsetException() {
         $log = $this->makeRandomLog(10);
         $this->expectException(\LogicException::class);
-        $this->expectErrorMessage('Unsupported operation');
+        $this->expectExceptionMessage('Unsupported operation');
         unset($log[9]);
     }
 
     public function testGetOutOfBoundsError() {
         $log = $this->makeRandomLog(10);
-        $this->expectError();
-        $this->expectErrorMessage('Undefined array key 10');
+        $this->expectException(\OutOfBoundsException::class);
+        $this->expectExceptionMessage('Undefined array key 10');
         $record = $log[10];
         $this->assertTrue($record->context['test']);
     }
@@ -137,7 +137,7 @@ final class LogTest extends TestCase
     public function testAppendException() {
         $log = $this->makeRandomLog(10);
         $this->expectException(\LogicException::class);
-        $this->expectErrorMessage('Unsupported operation');
+        $this->expectExceptionMessage('Unsupported operation');
         $log[] = $this->makeRandomRecord();
     }
 
