@@ -26,7 +26,7 @@ class Log extends \ArrayIterator implements \ArrayAccess {
 
         // using the php sort algorithm, sort this
         // sort DESCending (newest to oldest datetime)
-        usort($array, fn(LogRecord $a, LogRecord $b) => $b->datetime->format('U') - $a->datetime->format('U'));
+        usort($array, fn(LogRecord $a, LogRecord $b): int => (int) ($b->datetime->format('U') - $a->datetime->format('U')));
 
         // and if we sort ascending, simply reverse the array
         if ($ascending) {
