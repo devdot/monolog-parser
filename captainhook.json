@@ -1,0 +1,15 @@
+{
+    "pre-commit": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "vendor/bin/phpunit tests",
+                "options": []
+            },
+            {
+                "action": "vendor/bin/phpstan analyze src --level=9",
+                "options": []
+            }
+        ]
+    }
+}
