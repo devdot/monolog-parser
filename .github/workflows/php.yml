@@ -36,4 +36,4 @@ jobs:
       run: vendor/bin/phpunit tests
 
     - name: PHPStan src
-      run: vendor/bin/phpstan src --level=9
+      run: vendor/bin/phpstan analyze src --level=9
