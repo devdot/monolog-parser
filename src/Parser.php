@@ -242,6 +242,11 @@ class Parser {
                 throw new Exceptions\LogParsingException($filename, 'Failed to decode JSON: '.$json);
             }
         }
+        // and let's typecast this if it's not array or object
+        if(!is_array($object) && !($object instanceof \stdClass) && $object !== null) {
+            // simply put it into a an array
+            $object = [$object];
+        }
         return $object;
     }
 
