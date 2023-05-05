@@ -219,8 +219,13 @@ class Parser {
         return $this;
     }
 
+    /**
+     * Process a JSON block into either context or option
+     * @param string $text Input string as read from the file. This method will modify the string to make it parsable.
+     * @throws Exceptions\LogParsingException When json_decode fails and the parser is set to throw this exception.
+     * @return \stdClass|array<int, mixed>|string|\NULL
+     */
     protected function processJson(string $text): \stdClass|array|string|NULL {
-        // process the JSON in either context or option
         // replace characters to make JSON parsable
         $json = str_replace(["\r", "\n"], ['', '\n'], $text);
         // check if we have to parse it anyways

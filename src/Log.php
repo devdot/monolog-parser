@@ -4,10 +4,17 @@ namespace Devdot\Monolog;
 
 /**
  * Structure that holds multiple LogRecords like a readonly array.
+ * @extends \ArrayIterator<int, LogRecord>
+ * @implements \ArrayAccess<int, LogRecord>
  * @author Thomas Kuschan
  * @copyright (c) 2023
  */
 class Log extends \ArrayIterator implements \ArrayAccess {
+    /**
+     * Create a Log from a group of records
+     * @param LogRecord ...$records One or more log entries
+     * @no-named-arguments This will disallow named parameters and force $records to array<int, LogRecord>
+     */
     public function __construct(LogRecord ...$records) {
         parent::__construct($records);
     }
@@ -41,6 +48,12 @@ class Log extends \ArrayIterator implements \ArrayAccess {
         return parent::current();
     }
 
+    /**
+     * Get a LogRecord
+     * @param int $offset Index (int)
+     * @throws \OutOfBoundsException When the offset is not defined
+     * @return LogRecord
+     */
     public function offsetGet(mixed $offset): LogRecord {
         if(parent::offsetExists($offset)) {
             $offset = parent::offsetGet($offset);
@@ -48,14 +61,27 @@ class Log extends \ArrayIterator implements \ArrayAccess {
                 return $offset;
         }
         // exit with exception
-            throw new \OutOfBoundsException('Undefined array key '.$offset);
+        throw new \OutOfBoundsException('Undefined array key '.$offset);
     }
 
+    /**
+     * Not supported, readonly!
+     * @param int $offset
+     * @param LogRecord $value
+     * @throws \LogicException Always
+     * @return void
+     */
     public function offsetSet(mixed $offset, mixed $value): void {
         // we do not support setting in any way
         throw new \LogicException('Unsupported operation');
     }
 
+    /**
+     * Not supported, readonly!
+     * @param int $offset
+     * @throws \LogicException Always
+     * @return void
+     */
     public function offsetUnset(mixed $offset): void {
         throw new \LogicException('Unsupported operation');
     }

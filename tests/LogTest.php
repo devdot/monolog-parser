@@ -70,6 +70,17 @@ final class LogTest extends TestCase
             $this->makeRandomRecord(),
             $this->makeRandomRecord(),
         ]);
+        
+    }
+
+    public function testConstructWithNamedParameters() {
+        // this is technically possible
+        $log = new Log(
+            $this->makeRandomRecord(),
+            n: $this->makeRandomRecord(),
+            test: $this->makeRandomRecord(),
+        );
+        $this->assertTrue($log->offsetExists('test'));
     }
 
     public function testObjectInterface() {

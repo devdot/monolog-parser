@@ -4,10 +4,20 @@ namespace Devdot\Monolog;
 
 /**
  * Structure for holding the properties of a single log record.
+ * @implements \ArrayAccess<string, mixed>
  * @author Thomas Kuschan
  * @copyright (c) 2023
  */
 class LogRecord implements \ArrayAccess {
+    /**
+     * Create a LogRecord to hold a single log entry.
+     * @param \DateTimeImmutable $datetime
+     * @param string $channel
+     * @param string $level
+     * @param string $message
+     * @param array<int, mixed>|\stdClass|string|\NULL $context
+     * @param array<int, mixed>|\stdClass|string|\NULL $extra
+     */
     public function __construct(
         public readonly \DateTimeImmutable $datetime,
         public readonly string $channel,
