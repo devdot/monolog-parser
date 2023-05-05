@@ -35,3 +35,5 @@ jobs:
     - name: PHPUnit tests
       run: vendor/bin/phpunit tests
 
+    - name: PHPStan src
+      run: vendor/bin/phpstan src --level=9
