@@ -1,20 +1,22 @@
-# Select image from https://hub.docker.com/_/php
-image: thomasschaller/php-test:8.1
+default:
+  image: serversideup/php:8.1-cli
 
-# cache vendor files for increased performance
+stages:
+  - test
+
 cache:
   paths:
-    - vendor/
+   - vendor/
 
-before_script:
-  # Install dependencies
-  # - bash ci/docker_install.sh > /dev/null
-  - composer install
-
-phpunit:
+test_phpunit:
+  stage: test
   script:
+    - composer install
     - vendor/bin/phpunit tests
 
-phpstan:
+test_quality:
+  stage: test
   script:
-    - vendor/bin/phpstan analyze src --level=9
+    - composer install
+    - vendor/bin/phpcs --standard=PSR12 -n src
+    - vendor/bin/phpstan analyse src --level=9

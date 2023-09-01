@@ -9,13 +9,15 @@ namespace Devdot\Monolog;
  * @author Thomas Kuschan
  * @copyright (c) 2023
  */
-class Log extends \ArrayIterator implements \ArrayAccess {
+class Log extends \ArrayIterator implements \ArrayAccess
+{
     /**
      * Create a Log from a group of records
      * @param LogRecord ...$records One or more log entries
      * @no-named-arguments This will disallow named parameters and force $records to array<int, LogRecord>
      */
-    public function __construct(LogRecord ...$records) {
+    public function __construct(LogRecord ...$records)
+    {
         parent::__construct($records);
     }
 
@@ -24,9 +26,11 @@ class Log extends \ArrayIterator implements \ArrayAccess {
      * @param bool $ascending Sorting order, defaults to false (meaning it sorts descending)
      * @return void
      */
-    public function sortByDatetime(bool $ascending = false): void {
-        if (count($this) == 0)
+    public function sortByDatetime(bool $ascending = false): void
+    {
+        if (count($this) == 0) {
             return;
+        }
 
         // get the stored elements and rebuild the log
         $array = $this->getArrayCopy();
@@ -39,12 +43,13 @@ class Log extends \ArrayIterator implements \ArrayAccess {
         if ($ascending) {
             $array = array_reverse($array);
         }
-        
+
         // finally set this array as the new content for us
         parent::__construct($array);
     }
 
-    public function current(): LogRecord {
+    public function current(): LogRecord
+    {
         return parent::current();
     }
 
@@ -54,14 +59,16 @@ class Log extends \ArrayIterator implements \ArrayAccess {
      * @throws \OutOfBoundsException When the offset is not defined
      * @return LogRecord
      */
-    public function offsetGet(mixed $offset): LogRecord {
-        if(parent::offsetExists($offset)) {
+    public function offsetGet(mixed $offset): LogRecord
+    {
+        if (parent::offsetExists($offset)) {
             $offset = parent::offsetGet($offset);
-            if ($offset !== null)
+            if ($offset !== null) {
                 return $offset;
+            }
         }
         // exit with exception
-        throw new \OutOfBoundsException('Undefined array key '.$offset);
+        throw new \OutOfBoundsException('Undefined array key ' . $offset);
     }
 
     /**
@@ -71,7 +78,8 @@ class Log extends \ArrayIterator implements \ArrayAccess {
      * @throws \LogicException Always
      * @return void
      */
-    public function offsetSet(mixed $offset, mixed $value): void {
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
         // we do not support setting in any way
         throw new \LogicException('Unsupported operation');
     }
@@ -82,7 +90,8 @@ class Log extends \ArrayIterator implements \ArrayAccess {
      * @throws \LogicException Always
      * @return void
      */
-    public function offsetUnset(mixed $offset): void {
+    public function offsetUnset(mixed $offset): void
+    {
         throw new \LogicException('Unsupported operation');
     }
 }

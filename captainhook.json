@@ -3,6 +3,10 @@
         "enabled": true,
         "actions": [
             {
+                "action": "vendor/bin/phpcbf --standard=PSR12 src",
+                "options": []
+            },
+            {
                 "action": "vendor/bin/phpunit tests",
                 "options": []
             },
