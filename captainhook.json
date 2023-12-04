@@ -3,16 +3,18 @@
         "enabled": true,
         "actions": [
             {
-                "action": "vendor/bin/phpcbf --standard=PSR12 src",
-                "options": []
+                "action": "composer format"
+            }
+        ]
+    },
+    "pre-push": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "composer check-static"
             },
             {
-                "action": "vendor/bin/phpunit tests",
-                "options": []
-            },
-            {
-                "action": "vendor/bin/phpstan analyze src --level=9",
-                "options": []
+                "action": "composer test"
             }
         ]
     }

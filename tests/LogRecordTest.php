@@ -3,8 +3,10 @@
 use PHPUnit\Framework\TestCase;
 use Devdot\Monolog\LogRecord;
 
-final class LogRecordTest extends TestCase {
-    public function testConstruct() {
+final class LogRecordTest extends TestCase
+{
+    public function testConstruct()
+    {
         $record = new LogRecord(
             new \DateTimeImmutable('2023-01-02 08:00:01'),
             'test-channel',
@@ -24,7 +26,8 @@ final class LogRecordTest extends TestCase {
         $this->assertCount(0, $record->extra);
     }
 
-    public function testArrayAccess() {
+    public function testArrayAccess()
+    {
         $record = new LogRecord(
             new \DateTimeImmutable('2023-01-02 08:00:01'),
             'test-channel',
@@ -36,23 +39,21 @@ final class LogRecordTest extends TestCase {
         $this->assertIsObject($record);
         $this->assertIsNotArray($record);
 
-        // make sure we can read        
+        // make sure we can read
         $this->assertIsObject($record['datetime']);
         $this->assertIsString($record['channel']);
-        
+
         // make sure we can't write or unset
         try {
             $record['level'] = 'test';
             throw new \Exception();
-        }
-        catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->assertInstanceOf(\LogicException::class, $e);
         }
         try {
             unset($record['message']);
             throw new \Exception();
-        }
-        catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->assertInstanceOf(\LogicException::class, $e);
         }
     }

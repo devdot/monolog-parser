@@ -12,11 +12,11 @@ test_phpunit:
   stage: test
   script:
     - composer install
-    - vendor/bin/phpunit tests
+    - composer test
 
 test_quality:
   stage: test
   script:
     - composer install
     - vendor/bin/phpcs --standard=PSR12 -n src
-    - vendor/bin/phpstan analyse src --level=9
+    - composer check-static
