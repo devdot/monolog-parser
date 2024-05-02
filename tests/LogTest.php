@@ -6,19 +6,19 @@ use Devdot\Monolog\LogRecord;
 
 final class LogTest extends TestCase
 {
-    protected function makeRandomRecord(int $timestamp = null): LogRecord
+    private function makeRandomRecord(int $timestamp = null): LogRecord
     {
         return new LogRecord(
-            (new \DateTimeImmutable())->setTimestamp($timestamp ?? rand(0, time())),
-            'ch' . rand(0, 99),
+            (new \DateTimeImmutable())->setTimestamp($timestamp ?? random_int(0, time())),
+            'ch' . random_int(0, 99),
             (string) array_rand(['INFO', 'DEBUG', 'ERROR', 'WARNING']),
-            'message' . rand(0, 99),
+            'message' . random_int(0, 99),
             ['test' => true], // this is possible, but not recommended and won't happen with json_decode @phpstan-ignore-line
             (object) ['context' => false]
         );
     }
 
-    protected function makeRandomLog(int $size = 2): Log
+    private function makeRandomLog(int $size = 2): Log
     {
         $records = [];
         for ($i = 0; $i < $size; $i++) {
@@ -27,7 +27,7 @@ final class LogTest extends TestCase
         return new Log(...$records);
     }
 
-    public function testMakeRandomRecordHelper()
+    public function testMakeRandomRecordHelper(): void
     {
         $record = $this->makeRandomRecord();
         $this->assertInstanceOf(\DateTimeImmutable::class, $record->datetime);
@@ -42,7 +42,7 @@ final class LogTest extends TestCase
         $this->assertNotSame($this->makeRandomRecord(), $this->makeRandomRecord());
     }
 
-    public function testMakeRandomLogHelper()
+    public function testMakeRandomLogHelper(): void
     {
         $this->assertCount(10, $this->makeRandomLog(10));
         $this->assertCount(1, $this->makeRandomLog(1));
@@ -50,7 +50,7 @@ final class LogTest extends TestCase
         $this->assertNotSame($this->makeRandomLog(), $this->makeRandomLog());
     }
 
-    public function testConstruct()
+    public function testConstruct(): void
     {
         $record0 = $this->makeRandomRecord();
         $record1 = $this->makeRandomRecord();
@@ -68,19 +68,19 @@ final class LogTest extends TestCase
         $this->assertCount(1, new Log($record0));
     }
 
-    public function testConstructWithArrayException()
+    public function testConstructWithArrayException(): void
     {
         // try to pass an array into the constructor and it will fail
         $this->expectException(\TypeError::class);
         // this should fail, it's not how the constructor is supposed to work @phpstan-ignore-next-line
-        $log = new Log([
+        new Log([
             $this->makeRandomRecord(),
             $this->makeRandomRecord(),
             $this->makeRandomRecord(),
         ]);
     }
 
-    public function testConstructWithNamedParameters()
+    public function testConstructWithNamedParameters(): void
     {
         // this is technically possible
         $log = new Log(
@@ -91,7 +91,7 @@ final class LogTest extends TestCase
         $this->assertTrue($log->offsetExists('test')); // this is rightly complained about @phpstan-ignore-line
     }
 
-    public function testObjectInterface()
+    public function testObjectInterface(): void
     {
         // make a new log out of a handful of log records
         $record0 = $this->makeRandomRecord();
@@ -132,7 +132,7 @@ final class LogTest extends TestCase
         $this->assertEquals(count($log), $c);
     }
 
-    public function testSetException()
+    public function testSetException(): void
     {
         $log = $this->makeRandomLog(10);
         $this->expectException(\LogicException::class);
@@ -140,7 +140,7 @@ final class LogTest extends TestCase
         $log[3] = $this->makeRandomRecord();
     }
 
-    public function testUnsetException()
+    public function testUnsetException(): void
     {
         $log = $this->makeRandomLog(10);
         $this->expectException(\LogicException::class);
@@ -148,7 +148,7 @@ final class LogTest extends TestCase
         unset($log[9]);
     }
 
-    public function testGetOutOfBoundsError()
+    public function testGetOutOfBoundsError(): void
     {
         $log = $this->makeRandomLog(10);
         $this->expectException(\OutOfBoundsException::class);
@@ -157,7 +157,7 @@ final class LogTest extends TestCase
         $this->assertTrue($record->context['test']);
     }
 
-    public function testAppendException()
+    public function testAppendException(): void
     {
         $log = $this->makeRandomLog(10);
         $this->expectException(\LogicException::class);
@@ -165,7 +165,7 @@ final class LogTest extends TestCase
         $log[] = $this->makeRandomRecord(); // this will throw an exception @phpstan-ignore-line
     }
 
-    public function testSortByDatetime()
+    public function testSortByDatetime(): void
     {
         // create an unsorted log
         $log = new Log(...[
@@ -206,7 +206,7 @@ final class LogTest extends TestCase
         $this->assertSame($record0, $log[1]);
     }
 
-    public function testCastToArray()
+    public function testCastToArray(): void
     {
         $log = $this->makeRandomLog(2);
         $array = (array) $log;

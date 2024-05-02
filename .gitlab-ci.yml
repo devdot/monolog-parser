@@ -1,5 +1,5 @@
 default:
-  image: serversideup/php:8.1-cli
+  image: serversideup/php:8.2-cli
 
 stages:
   - test

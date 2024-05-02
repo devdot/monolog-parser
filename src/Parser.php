@@ -64,7 +64,7 @@ class Parser
     public function __construct(string $filename = '')
     {
         // if we were given a filename, initialize the file right away
-        if (!empty($filename)) {
+        if ($filename !== '') {
             $this->initializeFileObject($filename);
         }
     }
@@ -73,7 +73,6 @@ class Parser
      * Create a new instance (equivalent to __construct).
      * @param string $filename Absolute path to the existing log file.
      * @throws Exceptions\FileNotFoundException if the given file cannot be found.
-     * @return Parser
      */
     public static function new(string $filename = ''): self
     {
@@ -84,7 +83,6 @@ class Parser
      * Set the file at $filename.
      * @param string $filename Absolute path to the existing log file.
      * @throws Exceptions\FileNotFoundException if the given file cannot be found.
-     * @return Parser
      */
     public function setFile(string $filename): self
     {
@@ -94,7 +92,6 @@ class Parser
 
     /**
      * Returns true when the parser is ready to parse, otherwise false. This state requires that an existing, readable file to be set.
-     * @return bool
      */
     public function isReady(): bool
     {
@@ -107,7 +104,6 @@ class Parser
     /**
      * Set the pattern that will be used by parse when parsing the logfile.
      * @param string $pattern The regex needs to be valid and with named subpatterns.
-     * @return Parser
      */
     public function setPattern(string $pattern): self
     {
@@ -118,7 +114,6 @@ class Parser
     /**
      * Set parsing options with the provided option flags.
      * @param int $options Provide options with combined binary flags.
-     * @return Parser
      */
     public function setOptions(int $options): self
     {
@@ -154,7 +149,6 @@ class Parser
 
     /**
      * Clear the cache from previous parse and rewind the file if it was already read.
-     * @return Parser
      */
     public function clear(): self
     {
@@ -180,7 +174,7 @@ class Parser
     {
         // let's check if we have a string given to validate
         $str = '';
-        if (empty($string)) {
+        if ($string === '') {
             // make sure the file is ready, if not raise an exception
             if (!$this->isReady()) {
                 throw new Exceptions\ParserNotReadyException();
@@ -220,7 +214,7 @@ class Parser
         $this->records = new Log(...$records);
 
         // check if the records ought to be sorted
-        if ($this->optionSortDatetime === true) {
+        if ($this->optionSortDatetime) {
             $this->sortRecords();
         }
 
@@ -246,7 +240,7 @@ class Parser
         // make sure the json decode did not fail
         if ($object === null) {
             // check the soft fail option
-            if ($this->optionJsonFailSoft === true) {
+            if ($this->optionJsonFailSoft) {
                 // now just add the json as text instead of failing, since parsing didn't work
                 return trim($json);
             }

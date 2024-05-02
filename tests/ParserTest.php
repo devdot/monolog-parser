@@ -13,7 +13,7 @@ use Monolog\Formatter\LineFormatter;
 
 final class ParserTest extends TestCase
 {
-    protected $files = [
+    private array $files = [
         'test' => __DIR__ . '/files/test.log',
         'laravel-emergency' => __DIR__ . '/files/emergency.log',
         'ddtraceweb' => __DIR__ . '/files/ddtraceweb-monolog-parser-test.log',
@@ -25,19 +25,19 @@ final class ParserTest extends TestCase
         'brackets' => __DIR__ . '/files/brackets.log',
     ];
 
-    protected $invalidFiles = [
+    private array $invalidFiles = [
         __DIR__ . '/file.log',
         __DIR__ . '/asdf',
     ];
 
-    protected $exceptionsFiles = [
+    private array $exceptionsFiles = [
         'brackets' => __DIR__ . '/files/brackets-fail.log',
         'partial' => __DIR__ . '/files/partial-fail.log',
     ];
 
-    protected $tempFile = __DIR__ . '/files/__test.tmp.log';
+    private $tempFile = __DIR__ . '/files/__test.tmp.log';
 
-    public function assertLogRecords(Log $records, array $dates, array $channels, array $levels, array $messages, array $contexts, array $extras, string $errorMsg = 'Error validating log record %s: %s failed')
+    public function assertLogRecords(Log $records, array $dates, array $channels, array $levels, array $messages, array $contexts, array $extras, string $errorMsg = 'Error validating log record %s: %s failed'): void
     {
         foreach ($records as $key => $record) {
             $this->assertSame($dates[$key], $record['datetime']->format('Y-m-d'), sprintf($errorMsg, $key, 'datetime'));
@@ -71,7 +71,7 @@ final class ParserTest extends TestCase
         }
     }
 
-    public function testConstruct()
+    public function testConstruct(): void
     {
         // normal construction
         $parser = new Parser();
@@ -85,10 +85,10 @@ final class ParserTest extends TestCase
 
         // with invalid filename
         $this->expectException(FileNotFoundException::class);
-        $parser = new Parser($this->invalidFiles[0]);
+        new Parser($this->invalidFiles[0]);
     }
 
-    public function testNew()
+    public function testNew(): void
     {
         // test the static accessor
         $this->assertInstanceOf(Parser::class, Parser::new());
@@ -100,7 +100,7 @@ final class ParserTest extends TestCase
         $this->assertNotSame(Parser::new(), Parser::new());
     }
 
-    public function testIsReady()
+    public function testIsReady(): void
     {
         // test false on no filename
         $this->assertFalse((new Parser())->isReady());
@@ -114,13 +114,13 @@ final class ParserTest extends TestCase
             $parser = new Parser();
             try {
                 $parser->setFile($filename);
-            } catch (FileNotFoundException $e) {
+            } catch (FileNotFoundException) {
             }
             $this->assertFalse($parser->isReady(), 'Testfile ' . $filename . ' is ready!');
         }
     }
 
-    public function testClear()
+    public function testClear(): void
     {
         // make sure clear really clears the cache, but also doesn't if its not called
         $parser = new Parser($this->files['test']);
@@ -143,7 +143,7 @@ final class ParserTest extends TestCase
         $this->assertSame($parser, $parser->clear());
     }
 
-    public function testParse()
+    public function testParse(): void
     {
         // make sure the function works as intended
         // each call to parse will
@@ -170,7 +170,7 @@ final class ParserTest extends TestCase
         Parser::new()->parse();
     }
 
-    public function testParseString()
+    public function testParseString(): void
     {
         // check if we can manually parse a string
         $parser = new Parser();
@@ -199,7 +199,7 @@ final class ParserTest extends TestCase
         }
     }
 
-    public function testSetFile()
+    public function testSetFile(): void
     {
         $parser = new Parser();
         // simply test that the return is the object itself
@@ -208,7 +208,7 @@ final class ParserTest extends TestCase
         $this->assertTrue($parser->isReady());
     }
 
-    public function testSetPattern()
+    public function testSetPattern(): void
     {
         // test the pattern matching setting
         $parser = new Parser();
@@ -245,7 +245,7 @@ final class ParserTest extends TestCase
         $this->assertSame($parser, $parser->setPattern(''));
     }
 
-    public function testSetOptions()
+    public function testSetOptions(): void
     {
         $parser = Parser::new();
         $this->assertSame($parser, $parser->setOptions(Parser::OPTION_SORT_DATETIME));
@@ -298,7 +298,7 @@ final class ParserTest extends TestCase
         $this->assertTrue(self::helperGetPrivateProperty($parser, 'optionJsonAsText'));
     }
 
-    public function testOptionSkipExceptions()
+    public function testOptionSkipExceptions(): void
     {
         // use brackets testcase
         $parser = Parser::new($this->exceptionsFiles['brackets']);
@@ -324,7 +324,7 @@ final class ParserTest extends TestCase
         $this->assertSame('log', $records[2]['message']);
     }
 
-    public function testOptionJsonFailSoft()
+    public function testOptionJsonFailSoft(): void
     {
         // use brackets testcase
         $parser = Parser::new($this->exceptionsFiles['brackets']);
@@ -402,7 +402,7 @@ final class ParserTest extends TestCase
         $this->assertSame('{true:"invalid"}', $records[4]['extra']);
     }
 
-    public function testOptionJsonAsText()
+    public function testOptionJsonAsText(): void
     {
         // use normal test log
         $parser = Parser::new($this->files['test']);
@@ -448,7 +448,7 @@ final class ParserTest extends TestCase
         $this->assertIsNotArray($records[1]['extra']);
     }
 
-    public function testOptionSortDatetime()
+    public function testOptionSortDatetime(): void
     {
         // use custom logfile for this test
         $parser = Parser::new($this->files['datetime-sort']);
@@ -494,7 +494,7 @@ final class ParserTest extends TestCase
         }
     }
 
-    public function testGet()
+    public function testGet(): void
     {
         // basic params of get
         $parser = new Parser($this->files['test']);
@@ -544,7 +544,7 @@ final class ParserTest extends TestCase
         $this->assertIsArray($parser->get()->getArrayCopy());
     }
 
-    public function testGetAll()
+    public function testGetAll(): void
     {
         // simply test if any of our testfiles can be parsed without exceptions
         foreach ($this->files as $file) {
@@ -555,7 +555,7 @@ final class ParserTest extends TestCase
         }
     }
 
-    public function testGetEmergencyLog()
+    public function testGetEmergencyLog(): void
     {
         // validate with the emergency.log file
         $parser = new Parser($this->files['laravel-emergency']);
@@ -629,14 +629,14 @@ final class ParserTest extends TestCase
         $this->assertCount(0, $records[3]['extra']);
     }
 
-    public function testGetNotReady()
+    public function testGetNotReady(): void
     {
         $this->expectException(ParserNotReadyException::class);
         $parser = new Parser();
         $parser->get();
     }
 
-    public function testGetDynamic()
+    public function testGetDynamic(): void
     {
         // run a test with dynamic file generation and parsing
         $channel = 'logtesting';
@@ -686,7 +686,7 @@ final class ParserTest extends TestCase
         $this->assertFileDoesNotExist($this->tempFile, 'Temporary file could not be deleted!');
     }
 
-    public function testGetContextWithDatetime()
+    public function testGetContextWithDatetime(): void
     {
         // testcase where the context contains a datetime string just like the main string
         $parser = new Parser($this->files['datetime']);
@@ -716,7 +716,7 @@ final class ParserTest extends TestCase
         }
     }
 
-    public function testGetContextWithDatetimeLaravel()
+    public function testGetContextWithDatetimeLaravel(): void
     {
         // testcase where the context contains a datetime string just like the main string
         $parser = new Parser($this->files['datetime-laravel']);
@@ -743,7 +743,7 @@ final class ParserTest extends TestCase
         $this->assertEquals('2023-01-01 02:03:04', $records[4]['context']->date);
     }
 
-    public function testGetDdtraceWebLog()
+    public function testGetDdtraceWebLog(): void
     {
         // using https://github.com/ddtraceweb/monolog-parser/blob/master/tests/files/test.log
         // load the file and parse it
@@ -895,7 +895,7 @@ final class ParserTest extends TestCase
         $this->assertTrue($record['extra']->test);
     }
 
-    public function testGetLaravel()
+    public function testGetLaravel(): void
     {
         // using the real log file laravel.log
         $parser = new Parser($this->files['laravel']);
@@ -913,8 +913,8 @@ final class ParserTest extends TestCase
         $referenceLevel = array_fill(0, $count, 'ERROR'); // set this default
         // now overwrite the exceptions
         $exceptionKeys = [11, 12, 14, 15, 17, 18, 20, 21, 23, 24, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 38, 39, 42, 43];
-        array_walk($referenceChannel, fn(&$value, $key) => ($value = in_array($key, $exceptionKeys) ? 'laravel' : $value));
-        array_walk($referenceLevel, fn(&$value, $key) => ($value = in_array($key, $exceptionKeys) ? 'EMERGENCY' : $value));
+        array_walk($referenceChannel, fn(&$value, $key): string => ($value = in_array($key, $exceptionKeys) ? 'laravel' : $value));
+        array_walk($referenceLevel, fn(&$value, $key): string => ($value = in_array($key, $exceptionKeys) ? 'EMERGENCY' : $value));
         $referenceMessage = [
             0 => 'Database file at path [laravel] does not exist. Ensure this is an absolute path to the database. (SQL: PRAGMA foreign_keys = ON;)',
             2 => 'Database file at path [atabase/db.sqlite] does not exist. Ensure this is an absolute path to the database. (SQL: PRAGMA foreign_keys = ON;)',
@@ -966,12 +966,12 @@ final class ParserTest extends TestCase
 
             // check strlen if it is given
             if (array_key_exists($key, $referenceContextExceptionLength)) {
-                $this->assertEquals($referenceContextExceptionLength[$key], strlen($record['context']->exception), $msg . 'exception length mismatch');
+                $this->assertEquals($referenceContextExceptionLength[$key], strlen((string) $record['context']->exception), $msg . 'exception length mismatch');
             }
         }
     }
 
-    public function testGetMonolog2()
+    public function testGetMonolog2(): void
     {
         // $this->buildMonolog2();
 
@@ -995,7 +995,7 @@ final class ParserTest extends TestCase
         $this->assertLogRecords($records, $dates, $channels, $levels, $messages, $contexts, $extras);
 
         // manually assert a handful multiline logs
-        $this->assertEquals(1666 - 18, strlen($records[6]['context']->exception)); // strlen: 1666 characters in log, but thereof 18 \\ can be subtracted after parsing
+        $this->assertEquals(1666 - 18, strlen((string) $records[6]['context']->exception)); // strlen: 1666 characters in log, but thereof 18 \\ can be subtracted after parsing
         $this->assertEquals("foo\nbar\\name-with-n", $records[7]['context']->test);
 
         // now run comparison with default pattern (which will not catch all)
@@ -1015,12 +1015,12 @@ final class ParserTest extends TestCase
         $extras[13] = null;
 
         // reduce the arrays down to the entries without multiline
-        $dates = array_merge(array_filter($dates, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
-        $channels = array_merge(array_filter($channels, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
-        $levels = array_merge(array_filter($levels, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
-        $messages = array_merge(array_filter($messages, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
-        $contexts = array_merge(array_filter($contexts, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
-        $extras = array_merge(array_filter($extras, fn($key) => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
+        $dates = array_merge(array_filter($dates, fn($key): bool => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
+        $channels = array_merge(array_filter($channels, fn($key): bool => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
+        $levels = array_merge(array_filter($levels, fn($key): bool => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
+        $messages = array_merge(array_filter($messages, fn($key): bool => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
+        $contexts = array_merge(array_filter($contexts, fn($key): bool => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
+        $extras = array_merge(array_filter($extras, fn($key): bool => !in_array($key, $multiline), ARRAY_FILTER_USE_KEY));
 
         $this->assertLogRecords($records, $dates, $channels, $levels, $messages, $contexts, $extras);
 
@@ -1049,12 +1049,12 @@ final class ParserTest extends TestCase
         $this->assertCount(2, $records[10]['context']);
     }
 
-    public function testReadMeExample()
+    public function testReadMeExample(): void
     {
         // this testcase only exists to validate that README examples actually work
 
         // ## Basic Usage
-        ob_start(fn($buffer) => true);
+        ob_start(fn($buffer): true => true);
         $parser = new Parser($this->files['test']);
         $records = $parser->get();
         foreach ($records as $record) {
@@ -1148,7 +1148,7 @@ final class ParserTest extends TestCase
     }
 
     // just for building, @phpstan-ignore-next-line
-    private function buildMonolog2()
+    public function buildMonolog2(): void
     {
         // this function was used to build the monolog2 test case
         // using testcases from https://github.com/Seldaek/monolog/blob/2.x/tests/Monolog/Formatter/LineFormatterTest.php
@@ -1239,9 +1239,7 @@ final class ParserTest extends TestCase
         ]);
         // testDefFormatWithExceptionAndStacktraceParserFull
         $formatter = new LineFormatter(null, 'Y-m-d');
-        $formatter->includeStacktraces(true, function ($line) {
-            return $line;
-        });
+        $formatter->includeStacktraces(true, fn($line) => $line);
         $this->buildMonolog2Helper($stream, $formatter, [
             'level_name' => 'CRITICAL',
             'channel' => 'core',
@@ -1253,7 +1251,7 @@ final class ParserTest extends TestCase
         // testDefFormatWithExceptionAndStacktraceParserCustom
         $formatter = new LineFormatter(null, 'Y-m-d');
         $formatter->includeStacktraces(true, function ($line) {
-            if (strpos($line, 'TestCase.php') === false) {
+            if (!str_contains($line, 'TestCase.php')) {
                 return $line;
             }
         });
@@ -1267,9 +1265,7 @@ final class ParserTest extends TestCase
         ]);
         // testDefFormatWithExceptionAndStacktraceParserEmpty
         $formatter = new LineFormatter(null, 'Y-m-d');
-        $formatter->includeStacktraces(true, function ($line) {
-            return null;
-        });
+        $formatter->includeStacktraces(true, fn($line): null => null);
         $this->buildMonolog2Helper($stream, $formatter, [
             'level_name' => 'CRITICAL',
             'channel' => 'core',
@@ -1329,7 +1325,7 @@ final class ParserTest extends TestCase
         ]);
     }
 
-    private function buildMonolog2Helper(StreamHandler $stream, LineFormatter $formatter, array $message)
+    private function buildMonolog2Helper(StreamHandler $stream, LineFormatter $formatter, array $message): void
     {
         if (!isset($message['level'])) {
             $level = $message['level_name'];
@@ -1339,7 +1335,7 @@ final class ParserTest extends TestCase
         $stream->handle($message);
     }
 
-    public function testGetBracketsInJson()
+    public function testGetBracketsInJson(): void
     {
         // testcase with square/curly brackets in the strings of test Json
         $parser = new Parser($this->files['brackets']);
@@ -1360,7 +1356,7 @@ final class ParserTest extends TestCase
         );
     }
 
-    public function testGetBracketsInJsonFail()
+    public function testGetBracketsInJsonFail(): void
     {
         // testcase with square/curly brackets in the strings of test Json
         // these all should fail
@@ -1368,7 +1364,7 @@ final class ParserTest extends TestCase
 
         // load the lines from the file
         $file = file_get_contents($this->exceptionsFiles['brackets']);
-        $lines = array_filter(explode(PHP_EOL, $file), fn($val) => !empty($val));
+        $lines = array_filter(explode(PHP_EOL, $file), fn($val): bool => $val !== '');
 
         // the exception texts that are expected
         $exceptions = [
@@ -1377,7 +1373,7 @@ final class ParserTest extends TestCase
             'Failed to decode JSON:  {"test":"}',
         ];
         // prepend the first line of the exception
-        $exceptions = array_map(fn($str) => 'Failed to parse [STRING]' . PHP_EOL . $str, $exceptions);
+        $exceptions = array_map(fn($str): string => 'Failed to parse [STRING]' . PHP_EOL . $str, $exceptions);
 
         foreach ($lines as $key => $line) {
             try {

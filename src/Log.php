@@ -24,7 +24,6 @@ class Log extends \ArrayIterator implements \ArrayAccess
     /**
      * Sort the logs like an array by the datetime of the LogRecords it contains
      * @param bool $ascending Sorting order, defaults to false (meaning it sorts descending)
-     * @return void
      */
     public function sortByDatetime(bool $ascending = false): void
     {
@@ -57,7 +56,6 @@ class Log extends \ArrayIterator implements \ArrayAccess
      * Get a LogRecord
      * @param int $offset Index (int)
      * @throws \OutOfBoundsException When the offset is not defined
-     * @return LogRecord
      */
     public function offsetGet(mixed $offset): LogRecord
     {
@@ -76,7 +74,6 @@ class Log extends \ArrayIterator implements \ArrayAccess
      * @param int $offset
      * @param LogRecord $value
      * @throws \LogicException Always
-     * @return void
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
@@ -88,7 +85,6 @@ class Log extends \ArrayIterator implements \ArrayAccess
      * Not supported, readonly!
      * @param int $offset
      * @throws \LogicException Always
-     * @return void
      */
     public function offsetUnset(mixed $offset): void
     {
