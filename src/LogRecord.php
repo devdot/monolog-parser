@@ -8,7 +8,7 @@ namespace Devdot\Monolog;
  * @author Thomas Kuschan
  * @copyright (c) 2023
  */
-readonly class LogRecord implements \ArrayAccess
+class LogRecord implements \ArrayAccess
 {
     /**
      * Create a LogRecord to hold a single log entry.
@@ -16,12 +16,12 @@ readonly class LogRecord implements \ArrayAccess
      * @param array<int, mixed>|\stdClass|string|\NULL $extra
      */
     public function __construct(
-        public \DateTimeImmutable $datetime,
-        public string $channel,
-        public string $level,
-        public string $message,
-        public array|\stdClass|string|null $context = [],
-        public array|\stdClass|string|null $extra = [],
+        public readonly \DateTimeImmutable $datetime,
+        public readonly string $channel,
+        public readonly string $level,
+        public readonly string $message,
+        public readonly array|\stdClass|string|null $context = [],
+        public readonly array|\stdClass|string|null $extra = [],
     ) {
     }
 
