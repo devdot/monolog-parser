@@ -60,7 +60,7 @@ $parser = Parser::new(); // equivalent to new Parser()
 
 For parameters, see [Method Reference](#method-reference).
 
-Most methods return the `Parser` instance itself, allowing the calls to be chained in one line as seen in the exampled below.
+Most methods return the `Parser` instance itself, allowing the calls to be chained in one line as seen in the examples below.
 
 Every `Parser` is meant to be linked to only one file, however that is not a hard restriction and depends on your usage.
 
@@ -202,7 +202,7 @@ If not stated otherwise, methods return the object `$this`.
 
 ### Requirements
 
-- Monolog-Parser works with PHP 8.1 or above.
+- Monolog-Parser works with PHP 8.2 or above.
 - Monolog-Parser does *not* require any Monolog package.
 
 ### License
